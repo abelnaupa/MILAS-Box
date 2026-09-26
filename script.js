@@ -1,31 +1,41 @@
 // ==========================================
-// CONFIGURACIÓN DE GOOGLE SHEETS (vía opensheet.elk.wtf)
-// No requiere API key: opensheet solo lee hojas públicas ("Cualquiera con el
-// enlace, Lector") y las devuelve como JSON. No es una API oficial de Google,
-// es un servicio gratuito de terceros que hace de intermediario.
-// ==========================================
-// ==========================================
-// CONFIGURACIÓN DE GOOGLE SHEETS (vía opensheet.elk.sh)
+// CONFIGURACIÓN DE GOOGLE SHEETS (Vía CSV directo de Google)
 // ==========================================
 const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
-const BASE_URL = `https://opensheet.elk.sh/${SPREADSHEET_ID}`;
 
-// Helper genérico: trae una pestaña completa como array de objetos
+// Función para descargar y parsear cada pestaña publicada como CSV
 async function sheetFetch(nombrePestana) {
-  const url = `${BASE_URL}/${encodeURIComponent(nombrePestana)}`;
+  const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(nombrePestana)}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Error leyendo la pestaña "${nombrePestana}": ${res.status}`);
-  return res.json();
+  
+  const textoCSV = await res.text();
+  return parsearCSV(textoCSV);
+}
+
+// Convierte el texto CSV en un arreglo de objetos JavaScript
+function parsearCSV(csv) {
+  const lineas = csv.split("\n").filter(l => l.trim() !== "");
+  if (lineas.length === 0) return [];
+
+  const limpiar = celda => celda.replace(/^"(.*)"$/, "$1").replace(/""/g, '"').trim();
+  const encabezados = lineas[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(limpiar);
+
+  return lineas.slice(1).map(linea => {
+    const valores = linea.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(limpiar);
+    const objeto = {};
+    encabezados.forEach((h, i) => {
+      objeto[h] = valores[i] || "";
+    });
+    return objeto;
+  });
 }
 
 // ==========================================
-// 1. DATOS GENERALES (hero, dirección, redes)
-// Pestaña "General" con columnas: campo | valor
+// 1. DATOS GENERALES
 // ==========================================
 async function cargarGeneral() {
   const filas = await sheetFetch("General");
-
-  // Convierte [{campo:"tituloPrincipal", valor:"..."}] en {tituloPrincipal: "..."}
   const general = {};
   filas.forEach(fila => { general[fila.campo] = fila.valor; });
 
@@ -34,8 +44,9 @@ async function cargarGeneral() {
   document.getElementById("footer-direccion").textContent = general.direccion || "";
 
   const redes = document.getElementById("footer-redes");
+  redes.innerHTML = "";
   if (general.instagram) {
-    redes.innerHTML += `<a href="${general.instagram}" target="_blank">Instagram</a>`;
+    redes.innerHTML += `<a href="${general.instagram}" target="_blank">Instagram</a> `;
   }
   if (general.whatsapp) {
     redes.innerHTML += `<a href="${general.whatsapp}" target="_blank">WhatsApp</a>`;
@@ -44,7 +55,6 @@ async function cargarGeneral() {
 
 // ==========================================
 // 2. PROFESORES
-// Pestaña "Profesores" con columnas: nombre | especialidad | fotoURL
 // ==========================================
 async function cargarProfesores() {
   const profesores = await sheetFetch("Profesores");
@@ -61,8 +71,6 @@ async function cargarProfesores() {
 
 // ==========================================
 // 3. PLANES
-// Pestaña "Planes" con columnas: nombre | precio | descripcion | beneficios
-// (beneficios: varios ítems separados por coma dentro de la misma celda)
 // ==========================================
 async function cargarPlanes() {
   const planes = await sheetFetch("Planes");
@@ -83,7 +91,6 @@ async function cargarPlanes() {
 
 // ==========================================
 // 4. HORARIOS
-// Pestaña "Horarios" con columnas: dia | hora | actividad
 // ==========================================
 async function cargarHorarios() {
   const horarios = await sheetFetch("Horarios");
