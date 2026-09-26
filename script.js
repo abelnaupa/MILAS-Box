@@ -4,11 +4,13 @@
 // enlace, Lector") y las devuelve como JSON. No es una API oficial de Google,
 // es un servicio gratuito de terceros que hace de intermediario.
 // ==========================================
-const SPREADSHEET_ID = "P1a2b3c4d5e6f7g8h9i0j_K-XYZ";
+// ==========================================
+// CONFIGURACIÓN DE GOOGLE SHEETS (vía opensheet.elk.wtf)
+// ==========================================
+const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
 const BASE_URL = `https://opensheet.elk.wtf/${SPREADSHEET_ID}`;
 
 // Helper genérico: trae una pestaña completa como array de objetos
-// (usa la primera fila de la hoja como nombres de campo)
 async function sheetFetch(nombrePestana) {
   const url = `${BASE_URL}/${encodeURIComponent(nombrePestana)}`;
   const res = await fetch(url);
