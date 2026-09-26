@@ -4,7 +4,7 @@
 // enlace, Lector") y las devuelve como JSON. No es una API oficial de Google,
 // es un servicio gratuito de terceros que hace de intermediario.
 // ==========================================
-const SPREADSHEET_ID = "PEGA_AQUI_EL_ID_DE_TU_GOOGLE_SHEET";
+const SPREADSHEET_ID = "P1a2b3c4d5e6f7g8h9i0j_K-XYZ";
 const BASE_URL = `https://opensheet.elk.wtf/${SPREADSHEET_ID}`;
 
 // Helper genérico: trae una pestaña completa como array de objetos
