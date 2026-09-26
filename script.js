@@ -5,10 +5,10 @@
 // es un servicio gratuito de terceros que hace de intermediario.
 // ==========================================
 // ==========================================
-// CONFIGURACIÓN DE GOOGLE SHEETS (vía opensheet.elk.wtf)
+// CONFIGURACIÓN DE GOOGLE SHEETS (vía opensheet.elk.sh)
 // ==========================================
 const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
-const BASE_URL = `https://opensheet.elk.wtf/${SPREADSHEET_ID}`;
+const BASE_URL = `https://opensheet.elk.sh/${SPREADSHEET_ID}`;
 
 // Helper genérico: trae una pestaña completa como array de objetos
 async function sheetFetch(nombrePestana) {
