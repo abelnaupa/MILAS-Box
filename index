@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MILAS Box</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- HERO: se llena con el documento "general" -->
+  <header class="hero">
+    <h1 id="hero-titulo">Cargando...</h1>
+    <p id="hero-subtitulo"></p>
+  </header>
+
+  <!-- PROFESORES -->
+  <section class="seccion">
+    <h2>Nuestros Profesores</h2>
+    <div id="lista-profesores" class="grid"></div>
+  </section>
+
+  <!-- PLANES -->
+  <section class="seccion">
+    <h2>Planes</h2>
+    <div id="lista-planes" class="grid"></div>
+  </section>
+
+  <!-- HORARIOS -->
+  <section class="seccion">
+    <h2>Horarios</h2>
+    <table id="tabla-horarios">
+      <thead>
+        <tr><th>Día</th><th>Hora</th><th>Actividad</th></tr>
+      </thead>
+      <tbody id="cuerpo-horarios"></tbody>
+    </table>
+  </section>
+
+  <!-- FOOTER: direccion y redes, desde "general" -->
+  <footer>
+    <p id="footer-direccion"></p>
+    <div id="footer-redes"></div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
