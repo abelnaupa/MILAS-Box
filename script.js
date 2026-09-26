@@ -1,41 +1,31 @@
 // ==========================================
-// CONFIGURACIÓN DE SANITY
+// CONFIGURACIÓN DE GOOGLE SHEETS (vía opensheet.elk.wtf)
+// No requiere API key: opensheet solo lee hojas públicas ("Cualquiera con el
+// enlace, Lector") y las devuelve como JSON. No es una API oficial de Google,
+// es un servicio gratuito de terceros que hace de intermediario.
 // ==========================================
-const PROJECT_ID = "1ehiilvi";
-const DATASET = "production";
-const API_VERSION = "v2021-10-21";
+const SPREADSHEET_ID = "PEGA_AQUI_EL_ID_DE_TU_GOOGLE_SHEET";
+const BASE_URL = `https://opensheet.elk.wtf/${SPREADSHEET_ID}`;
 
-const BASE_URL = `https://${PROJECT_ID}.api.sanity.io/${API_VERSION}/data/query/${DATASET}`;
-
-// Helper genérico: ejecuta una query GROQ y devuelve el resultado
-async function sanityFetch(query) {
-  const url = `${BASE_URL}?query=${encodeURIComponent(query)}`;
+// Helper genérico: trae una pestaña completa como array de objetos
+// (usa la primera fila de la hoja como nombres de campo)
+async function sheetFetch(nombrePestana) {
+  const url = `${BASE_URL}/${encodeURIComponent(nombrePestana)}`;
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Error Sanity API: ${res.status}`);
-  const data = await res.json();
-  return data.result;
-}
-
-// Convierte la referencia de imagen de Sanity (ej: "image-abc123-800x600-jpg")
-// en una URL real servida por el CDN de Sanity.
-function urlFor(imageRef) {
-  if (!imageRef) return "";
-  // formato típico: image-<id>-<ancho>x<alto>-<formato>
-  const parts = imageRef.split("-");
-  const id = parts[1];
-  const dimensiones = parts[2];
-  const formato = parts[3];
-  return `https://cdn.sanity.io/images/${PROJECT_ID}/${DATASET}/${id}-${dimensiones}.${formato}`;
+  if (!res.ok) throw new Error(`Error leyendo la pestaña "${nombrePestana}": ${res.status}`);
+  return res.json();
 }
 
 // ==========================================
 // 1. DATOS GENERALES (hero, dirección, redes)
-// AJUSTA los nombres de campo si en tu schema son distintos
+// Pestaña "General" con columnas: campo | valor
 // ==========================================
 async function cargarGeneral() {
-  const query = `*[_type == "general"][0]{tituloPrincipal, subtitulo, direccion, instagram, whatsapp}`;
-  const general = await sanityFetch(query);
-  if (!general) return;
+  const filas = await sheetFetch("General");
+
+  // Convierte [{campo:"tituloPrincipal", valor:"..."}] en {tituloPrincipal: "..."}
+  const general = {};
+  filas.forEach(fila => { general[fila.campo] = fila.valor; });
 
   document.getElementById("hero-titulo").textContent = general.tituloPrincipal || "";
   document.getElementById("hero-subtitulo").textContent = general.subtitulo || "";
@@ -52,15 +42,15 @@ async function cargarGeneral() {
 
 // ==========================================
 // 2. PROFESORES
+// Pestaña "Profesores" con columnas: nombre | especialidad | fotoURL
 // ==========================================
 async function cargarProfesores() {
-  const query = `*[_type == "profesor"]{nombre, especialidad, "fotoRef": foto.asset._ref}`;
-  const profesores = await sanityFetch(query);
+  const profesores = await sheetFetch("Profesores");
   const contenedor = document.getElementById("lista-profesores");
 
   contenedor.innerHTML = profesores.map(p => `
     <div class="card">
-      <img src="${urlFor(p.fotoRef)}" alt="${p.nombre}">
+      <img src="${p.fotoURL || ""}" alt="${p.nombre}">
       <h3>${p.nombre}</h3>
       <p>${p.especialidad}</p>
     </div>
@@ -69,28 +59,32 @@ async function cargarProfesores() {
 
 // ==========================================
 // 3. PLANES
+// Pestaña "Planes" con columnas: nombre | precio | descripcion | beneficios
+// (beneficios: varios ítems separados por coma dentro de la misma celda)
 // ==========================================
 async function cargarPlanes() {
-  const query = `*[_type == "plan"]{nombre, precio, descripcion, beneficios}`;
-  const planes = await sanityFetch(query);
+  const planes = await sheetFetch("Planes");
   const contenedor = document.getElementById("lista-planes");
 
-  contenedor.innerHTML = planes.map(pl => `
-    <div class="card">
-      <h3>${pl.nombre}</h3>
-      <p><strong>$${pl.precio}</strong></p>
-      <p>${pl.descripcion || ""}</p>
-      <ul>${(pl.beneficios || []).map(b => `<li>${b}</li>`).join("")}</ul>
-    </div>
-  `).join("");
+  contenedor.innerHTML = planes.map(pl => {
+    const beneficios = (pl.beneficios || "").split(",").map(b => b.trim()).filter(Boolean);
+    return `
+      <div class="card">
+        <h3>${pl.nombre}</h3>
+        <p><strong>$${pl.precio}</strong></p>
+        <p>${pl.descripcion || ""}</p>
+        <ul>${beneficios.map(b => `<li>${b}</li>`).join("")}</ul>
+      </div>
+    `;
+  }).join("");
 }
 
 // ==========================================
 // 4. HORARIOS
+// Pestaña "Horarios" con columnas: dia | hora | actividad
 // ==========================================
 async function cargarHorarios() {
-  const query = `*[_type == "horario"] | order(dia asc){dia, hora, actividad}`;
-  const horarios = await sanityFetch(query);
+  const horarios = await sheetFetch("Horarios");
   const cuerpo = document.getElementById("cuerpo-horarios");
 
   cuerpo.innerHTML = horarios.map(h => `
