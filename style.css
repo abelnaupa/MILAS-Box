@@ -33,9 +33,17 @@ body { font-family: system-ui, sans-serif; margin: 0; color: #1a1a1a; }
   margin-bottom: 10px;
 }
 
-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+.tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 650px; /* Evita que las columnas se aplasten en pantallas pequeñas */
+}
 footer {
   background: #111;
   color: #fff;
