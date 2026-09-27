@@ -1,19 +1,21 @@
-
 // ==========================================
-// CONFIGURACIÓN DE GOOGLE SHEETS PUBLICADO
+// CONFIGURACIÓN DE GOOGLE SHEETS (vía endpoint gviz/tq de Google)
+// No requiere API key. Funciona con la hoja compartida como
+// "Cualquiera con el enlace puede ver" (no hace falta "Publicar en la web").
+// A diferencia de /pub, este endpoint SÍ respeta el nombre de la pestaña.
 // ==========================================
-const PUB_ID = "e/2PACX-1vSAksM20_k4UPvSTi5FJuLrJuCNz9yBh4Md38atgbyQ8BnYzqe5V2mQa0LIbuoXVCEgyrwXrYS0oDUW";
+const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
 
 async function sheetFetch(nombrePestana) {
-  // Construimos la URL uniendo los textos directamente
-  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSAksM20_k4UPvSTi5FJuLrJuCNz9yBh4Md38atgbyQ8BnYzqe5V2mQa0LIbuoXVCEgyrwXrYS0oDUW/pub?single=true&output=csv&sheet=" + encodeURIComponent(nombrePestana);
-  
+  const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(nombrePestana)}`;
+
   const res = await fetch(url);
-  if (!res.ok) throw new Error("Error leyendo pestaña " + nombrePestana + ": " + res.status);
-  
+  if (!res.ok) throw new Error(`Error leyendo pestaña "${nombrePestana}": ${res.status}`);
+
   const textoCSV = await res.text();
   return parsearCSV(textoCSV);
 }
+
 function parsearCSV(csv) {
   const lineas = csv.split(/\r?\n/).filter(l => l.trim() !== "");
   if (lineas.length === 0) return [];
@@ -154,6 +156,7 @@ async function cargarHorarios() {
     console.error("Error cargando Horarios:", err);
   }
 }
+
 // ==========================================
 // INICIALIZACIÓN
 // ==========================================
