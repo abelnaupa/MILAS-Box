@@ -5,9 +5,12 @@
 const PUB_ID = "e/2PACX-1vSAksM20_k4UPvSTi5FJuLrJuCNz9yBh4Md38atgbyQ8BnYzqe5V2mQa0LIbuoXVCEgyrwXrYS0oDUW";
 
 async function sheetFetch(nombrePestana) {
-  const url = `https://docs.google.com/spreadsheets/d/${PUB_ID}/pub?single=true&output=csv&sheet=${encodeURIComponent(nombrePestana)}`;
+  // Construimos la URL uniendo los textos directamente
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSAksM20_k4UPvSTi5FJuLrJuCNz9yBh4Md38atgbyQ8BnYzqe5V2mQa0LIbuoXVCEgyrwXrYS0oDUW/pub?single=true&output=csv&sheet=" + encodeURIComponent(nombrePestana);
+  
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Error en pestaña "${nombrePestana}": ${res.status}`);
+  if (!res.ok) throw new Error("Error leyendo pestaña " + nombrePestana + ": " + res.status);
+  
   const textoCSV = await res.text();
   return parsearCSV(textoCSV);
 }
