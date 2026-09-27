@@ -12,7 +12,11 @@ async function sheetFetch(nombrePestana) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Error leyendo pestaña "${nombrePestana}": ${res.status}`);
 
-  const textoCSV = await res.text();
+  // Forzamos la decodificación como UTF-8 explícitamente. Si usáramos
+  // res.text() directo, el navegador a veces adivina mal la codificación
+  // y las tildes (é, á, í, ó, ú, ñ) salen corruptas (ej: "Ã©" en vez de "é").
+  const buffer = await res.arrayBuffer();
+  const textoCSV = new TextDecoder("utf-8").decode(buffer);
   return parsearCSV(textoCSV);
 }
 
