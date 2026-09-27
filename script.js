@@ -1,16 +1,16 @@
+
 // ==========================================
-// CONFIGURACIÓN DE GOOGLE SHEETS (CSV)
+// CONFIGURACIÓN DE GOOGLE SHEETS PUBLICADO
 // ==========================================
-const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
+const PUB_ID = "e/2PACX-1vSAksM20_k4UPvSTi5FJuLrJuCNz9yBh4Md38atgbyQ8BnYzqe5V2mQa0LIbuoXVCEgyrwXrYS0oDUW";
 
 async function sheetFetch(nombrePestana) {
-  const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(nombrePestana)}`;
+  const url = `https://docs.google.com/spreadsheets/d/${PUB_ID}/pub?single=true&output=csv&sheet=${encodeURIComponent(nombrePestana)}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Error en pestaña "${nombrePestana}": ${res.status}`);
   const textoCSV = await res.text();
   return parsearCSV(textoCSV);
 }
-
 function parsearCSV(csv) {
   const lineas = csv.split(/\r?\n/).filter(l => l.trim() !== "");
   if (lineas.length === 0) return [];
