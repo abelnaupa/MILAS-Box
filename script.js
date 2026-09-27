@@ -122,18 +122,31 @@ async function cargarHorarios() {
     const cuerpo = document.getElementById("cuerpo-horarios");
     if (!cuerpo) return;
 
-    cuerpo.innerHTML = horarios.map(h => `
-      <tr>
-        <td><strong>${h.Hora || h.hora || ''}</strong></td>
-        <td>${h.Lunes || ''}</td>
-        <td>${h.Martes || ''}</td>
-        <td>${h.Miércoles || h.Miercoles || ''}</td>
-        <td>${h.Jueves || ''}</td>
-        <td>${h.Viernes || ''}</td>
-        <td>${h.Sábado || h.Sabado || ''}</td>
-        <td>${h.Domingo || ''}</td>
-      </tr>
-    `).join("");
+    if (!horarios || horarios.length === 0) {
+      cuerpo.innerHTML = "<tr><td colspan='8'>No hay horarios registrados.</td></tr>";
+      return;
+    }
+
+    cuerpo.innerHTML = horarios.map(h => {
+      // Helper para buscar el valor de la columna sin importar tildes o mayúsculas
+      const obtener = (nombre) => {
+        const clave = Object.keys(h).find(k => k.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === nombre.toLowerCase());
+        return clave ? h[clave] : '';
+      };
+
+      return `
+        <tr>
+          <td><strong>${obtener('hora')}</strong></td>
+          <td>${obtener('lunes')}</td>
+          <td>${obtener('martes')}</td>
+          <td>${obtener('miercoles')}</td>
+          <td>${obtener('jueves')}</td>
+          <td>${obtener('viernes')}</td>
+          <td>${obtener('sabado')}</td>
+          <td>${obtener('domingo')}</td>
+        </tr>
+      `;
+    }).join("");
   } catch (err) {
     console.error("Error cargando Horarios:", err);
   }
