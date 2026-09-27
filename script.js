@@ -122,23 +122,22 @@ async function cargarHorarios() {
     const cuerpo = document.getElementById("cuerpo-horarios");
     if (!cuerpo) return;
 
-    if (horarios.length === 0) {
-      cuerpo.innerHTML = "<tr><td colspan='3'>No hay horarios asignados.</td></tr>";
-      return;
-    }
-
     cuerpo.innerHTML = horarios.map(h => `
       <tr>
-        <td>${h.dia || ''}</td>
-        <td>${h.hora || ''}</td>
-        <td>${h.actividad || ''}</td>
+        <td><strong>${h.Hora || h.hora || ''}</strong></td>
+        <td>${h.Lunes || ''}</td>
+        <td>${h.Martes || ''}</td>
+        <td>${h.Miércoles || h.Miercoles || ''}</td>
+        <td>${h.Jueves || ''}</td>
+        <td>${h.Viernes || ''}</td>
+        <td>${h.Sábado || h.Sabado || ''}</td>
+        <td>${h.Domingo || ''}</td>
       </tr>
     `).join("");
   } catch (err) {
     console.error("Error cargando Horarios:", err);
   }
 }
-
 // ==========================================
 // INICIALIZACIÓN
 // ==========================================
