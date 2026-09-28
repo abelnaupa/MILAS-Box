@@ -33,17 +33,25 @@ body { font-family: system-ui, sans-serif; margin: 0; color: #1a1a1a; }
   margin-bottom: 10px;
 }
 
-.tabla-contenedor {
+..tabla-contenedor {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-table {
+#tabla-horarios {
   width: 100%;
   border-collapse: collapse;
-  min-width: 650px; /* Evita que las columnas se aplasten en pantallas pequeñas */
+  min-width: 600px; /* Evita que las columnas se aplasten en celular */
 }
+
+#tabla-horarios th, 
+#tabla-horarios td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
 footer {
   background: #111;
   color: #fff;
