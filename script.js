@@ -51,7 +51,7 @@ async function cargarGeneral() {
     });
 
     // Solo actualiza el título si en Google Sheets viene definido y es distinto a "MILAS Gym"
-    if (general.tituloPrincipal && general.tituloPrincipal !== "MILAS Gym") {
+    if (general.tituloPrincipal && general.tituloPrincipal !== "MILAS Box") {
       document.getElementById("hero-titulo").textContent = general.tituloPrincipal;
     } else if (!general.tituloPrincipal) {
       document.getElementById("hero-titulo").textContent = "MILAS Box";
