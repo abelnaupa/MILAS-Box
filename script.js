@@ -50,7 +50,13 @@ async function cargarGeneral() {
       if (clave) general[clave.trim()] = valor;
     });
 
-    document.getElementById("hero-titulo").textContent = general.tituloPrincipal || "MILAS Gym";
+    // Solo actualiza el título si en Google Sheets viene definido y es distinto a "MILAS Gym"
+    if (general.tituloPrincipal && general.tituloPrincipal !== "MILAS Gym") {
+      document.getElementById("hero-titulo").textContent = general.tituloPrincipal;
+    } else if (!general.tituloPrincipal) {
+      document.getElementById("hero-titulo").textContent = "MILAS Box";
+    }
+
     document.getElementById("hero-subtitulo").textContent = general.subtitulo || "";
     document.getElementById("footer-direccion").textContent = general.direccion || "";
 
@@ -62,7 +68,7 @@ async function cargarGeneral() {
     }
   } catch (err) {
     console.error("Error cargando General:", err);
-    document.getElementById("hero-titulo").textContent = "MILAS Gym";
+    document.getElementById("hero-titulo").textContent = "MILAS Box";
   }
 }
 
