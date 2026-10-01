@@ -101,34 +101,70 @@ async function cargarProfesores() {
 // ==========================================
 // 3. PLANES
 // ==========================================
-async function cargarPlanes() {
-  try {
-    const planes = await sheetFetch("Planes");
-    const contenedor = document.getElementById("lista-planes");
-    if (!contenedor) return;
-
-    if (planes.length === 0) {
-      contenedor.innerHTML = "<p>No hay planes registrados.</p>";
-      return;
-    }
-
-    contenedor.innerHTML = planes.map(pl => {
-      const beneficios = (pl.beneficios || "").split(",").map(b => b.trim()).filter(Boolean);
-      return `
-        <div class="card">
-          <h3>${pl.nombre || 'Plan'}</h3>
-          <p><strong>$${pl.precio || '0'}</strong></p>
-          <p>${pl.descripcion || ""}</p>
-          <ul>${beneficios.map(b => `<li>${b}</li>`).join("")}</ul>
-        </div>
-      `;
-    }).join("");
-  } catch (err) {
-    console.error("Error cargando Planes:", err);
+// Arreglo con los planes obtenidos de tu planilla
+const planes = [
+  {
+    nombre: "MENSUAL",
+    precio: "$39.990",
+    destacado: false,
+    beneficios: [
+      "🥊 Clases de Boxeo incluidas",
+      "🏋️ Accesso a Sala de Musculación",
+      "🔥 Modalidad Full Acceso"
+    ]
+  },
+  {
+    nombre: "TRIMESTRAL",
+    precio: "$84.990",
+    destacado: false,
+    beneficios: [
+      "🥊 Clases de Boxeo incluidas",
+      "🏋️ Accesso a Sala de Musculación",
+      "🔥 Modalidad Full Acceso"
+    ]
+  },
+  {
+    nombre: "SEMESTRAL",
+    precio: "$139.990",
+    destacado: true, // Resalta la tarjeta visualmente
+    badge: "MÁS RECOMENDADO",
+    beneficios: [
+      "🥊 Clases de Boxeo incluidas",
+      "🏋️ Accesso a Sala de Musculación",
+      "🔥 Modalidad Full Acceso",
+      "⭐ Incluye Evaluación Kinésica O Rutina de Entrenamiento"
+    ]
   }
+];
+
+// Función para renderizar los planes en la landing
+function cargarPlanes() {
+  const contenedor = document.getElementById("lista-planes");
+  if (!contenedor) return;
+
+  contenedor.innerHTML = planes.map(plan => `
+    <div class="tarjeta-plan ${plan.destacado ? 'destacado' : ''}">
+      ${plan.destacado ? `<div class="badge-pop">${plan.badge}</div>` : ''}
+      <div>
+        <h3 class="nombre-plan">${plan.nombre}</h3>
+        <div class="precio-plan">${plan.precio}</div>
+        <ul class="lista-beneficios">
+          ${plan.beneficios.map(b => `
+            <li class="${b.includes('⭐') ? 'beneficio-extra' : ''}">${b}</li>
+          `).join('')}
+        </ul>
+      </div>
+      <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20más%20información%20del%20Plan%20${plan.nombre}" 
+         target="_blank" 
+         class="btn-plan">
+         Elegir Plan ${plan.nombre}
+      </a>
+    </div>
+  `).join('');
 }
 
-// ==========================================
+// Ejecutar cuando cargue el documento
+document.addEventListener("DOMContentLoaded", cargarPlanes);// ==========================================
 // 4. HORARIOS
 // ==========================================
 async function cargarHorarios() {
