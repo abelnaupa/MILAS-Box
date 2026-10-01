@@ -208,6 +208,12 @@ async function cargarHorarios() {
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
   cargarGeneral();
+  // Agrega esto al final de tu script.js para asegurar que cargue en móvil
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', cargarPlanes);
+} else {
+  cargarPlanes();
+}
   cargarProfesores();
   cargarPlanes();
   cargarHorarios();
