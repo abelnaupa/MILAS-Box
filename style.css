@@ -33,30 +33,64 @@ body { font-family: system-ui, sans-serif; margin: 0; color: #1a1a1a; }
   margin-bottom: 10px;
 }
 
-..tabla-contenedor {
+/* Contenedor responsivo para la tabla */
+.tabla-contenedor {
   width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: auto; /* Permite el scroll horizontal solo en el contenedor */
+  -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
+/* Estilos de la tabla */
 #tabla-horarios {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px; /* Evita que las columnas se aplasten en celular */
+  min-width: 650px; /* IMPORTANTE: Asegura que la tabla mantenga un tamaño legible */
+  text-align: center;
 }
 
 #tabla-horarios th, 
 #tabla-horarios td {
-  padding: 10px;
-  border: 1px solid #ddd;
-  text-align: center;
+  padding: 12px 10px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
 }
 
-footer {
-  background: #111;
-  color: #fff;
-  padding: 30px 20px;
-  text-align: center;
+#tabla-horarios th {
+  background-color: #0f172a;
+  color: #ffffff;
+  white-space: nowrap;
 }
 
-footer a { color: #fff; margin: 0 8px; }
+/* Fijar la columna de 'Hora' a la izquierda al hacer scroll (opcional pero muy útil) */
+#tabla-horarios th:first-child,
+#tabla-horarios td:first-child {
+  position: sticky;
+  left: 0;
+  background-color: #f8fafc;
+  font-weight: bold;
+  z-index: 2;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+}
+
+#tabla-horarios th:first-child {
+  background-color: #0f172a;
+  color: white;
+}
+
+/* Indicador visual solo para celulares */
+.indicador-scroll {
+  display: none;
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .indicador-scroll {
+    display: block; /* Muestra el mensaje solo en móviles */
+  }
+}
