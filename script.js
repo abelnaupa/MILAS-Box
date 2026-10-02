@@ -44,11 +44,20 @@ async function cargarProfesores() {
       const nombre = p.nombre || Object.values(p)[0] || 'Profesor';
       const rol = p.rol || p.especialidad || Object.values(p)[1] || '';
       const desc = p.descripcion || p.desc || Object.values(p)[2] || '';
-      const img = p.imagen || p.foto || 'profesor1.jpg';
+      
+      let imgUrl = p.imagen || p.foto || 'profesor1.jpg';
+
+      // Conversión automática de enlaces de Google Drive
+      if (imgUrl.includes('drive.google.com')) {
+        const match = imgUrl.match(/\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/);
+        if (match && match[1]) {
+          imgUrl = `https://lh3.googleusercontent.com/d/${match[1]}`;
+        }
+      }
 
       return `
         <div class="card-profesor" style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; margin-bottom: 10px;">
-          <img src="${img}" alt="${nombre}" style="width:100%; max-height:250px; object-fit:cover;">
+          <img src="${imgUrl}" alt="${nombre}" style="width:100%; max-height:250px; object-fit:cover;">
           <div class="card-profesor-info">
             <span class="card-profesor-role" style="color:#ea2b2b;">${rol}</span>
             <h3 class="card-profesor-nombre">${nombre}</h3>
@@ -62,7 +71,6 @@ async function cargarProfesores() {
     cont.innerHTML = `<p style="color:#ea2b2b;">Error al leer la pestaña "Profesores". Revisa que el Sheet sea público.</p>`;
   }
 }
-
 // 2. Cargar Planes
 // PON AQUÍ TU NÚMERO DE WHATSAPP (código de país 56 + 9 + número sin espacios)
 const NUMERO_WHATSAPP = "569XXXXXXXX"; 
