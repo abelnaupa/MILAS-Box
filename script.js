@@ -1,187 +1,93 @@
-const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
+// Remplace con la URL desplegada como Ejecutar como: Yo / Tiene acceso: Cualquier persona
+const URL_WEB_APP = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
-async function sheetFetch(nombrePestana) {
-  const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(nombrePestana)}`;
-  const res = await fetch(url);
-  
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status}: No se pudo acceder a la pestaña ${nombrePestana}`);
+document.addEventListener('DOMContentLoaded', () => {
+  cargarDatosGoogleSheet();
+});
+
+async function cargarDatosGoogleSheet() {
+  try {
+    const respuesta = await fetch(URL_WEB_APP);
+    const datos = await respuesta.json();
+
+    console.log("Datos recibidos del Sheet:", datos);
+
+    if (datos.profesores) renderizarProfesores(datos.profesores);
+    if (datos.planes) renderizarPlanes(datos.planes);
+    if (datos.horarios) renderizarHorarios(datos.horarios);
+
+  } catch (error) {
+    console.error("Error al cargar datos desde Google Sheets:", error);
   }
-
-  const textoCSV = await res.text();
-  return parsearCSV(textoCSV);
 }
 
-function parsearCSV(csv) {
-  const lineas = csv.split(/\r?\n/).filter(l => l.trim() !== "");
-  if (lineas.length === 0) return [];
+// 1. PROFESORES
+function renderizarProfesores(profesores) {
+  const contenedor = document.getElementById('lista-profesores');
+  if (!contenedor) return;
+  contenedor.innerHTML = '';
 
-  const limpiar = celda => celda ? celda.replace(/^"(.*)"$/, "$1").replace(/""/g, '"').trim() : "";
-  const encabezados = lineas[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(limpiar);
+  profesores.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'card-profesor';
+    card.style.border = "1px solid #ccc"; // Estilo básico para verificar render
+    card.style.padding = "10px";
 
-  return lineas.slice(1).map(linea => {
-    const valores = linea.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(limpiar);
-    const objeto = {};
-    encabezados.forEach((h, i) => {
-      if (h) objeto[h] = valores[i] || "";
-    });
-    return objeto;
+    card.innerHTML = `
+      <h3>${p.nombre || p.Nombre || 'Sin nombre'}</h3>
+      <p><strong>${p.cargo || p.Cargo || ''}</strong></p>
+      <p>${p.descripcion || p.Descripcion || ''}</p>
+    `;
+    contenedor.appendChild(card);
   });
 }
 
-function getVal(obj, keyName) {
-  if (!obj) return "";
-  const keys = Object.keys(obj);
-  const matchedKey = keys.find(k => k.trim().toLowerCase() === keyName.toLowerCase());
-  return matchedKey ? obj[matchedKey] : "";
-}
+// 2. PLANES
+function renderizarPlanes(planes) {
+  const contenedor = document.getElementById('lista-planes');
+  if (!contenedor) return;
+  contenedor.innerHTML = '';
 
-// Carga General
-async function cargarGeneral() {
-  try {
-    const filas = await sheetFetch("General");
-    const general = {};
-    filas.forEach(fila => {
-      const clave = getVal(fila, "campo") || Object.values(fila)[0];
-      const valor = getVal(fila, "valor") || Object.values(fila)[1];
-      if (clave) general[clave.toLowerCase().trim()] = valor;
+  planes.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'card-plan';
+    card.style.border = "1px solid #ccc";
+    card.style.padding = "15px";
+
+    // Convertimos la lista de beneficios si vienen separados por coma
+    let beneficiosHTML = '';
+    const items = (p.beneficios || p.Beneficios || '').split(',');
+    items.forEach(item => {
+      if (item.trim()) beneficiosHTML += `<li>✓ ${item.trim()}</li>`;
     });
 
-    const elemSub = document.getElementById("hero-subtitulo");
-    if (elemSub && general.subtitulo) elemSub.textContent = general.subtitulo;
-
-    const elemDir = document.getElementById("footer-direccion");
-    if (elemDir && general.direccion) elemDir.textContent = general.direccion;
-  } catch (err) {
-    console.warn("General:", err);
-  }
+    card.innerHTML = `
+      <h3>${p.nombre || p.Nombre || 'Plan'}</h3>
+      <h4>${p.precio || p.Precio || ''}</h4>
+      <ul style="list-style:none; padding:0;">${beneficiosHTML}</ul>
+    `;
+    contenedor.appendChild(card);
+  });
 }
 
-// Carga Profesores
-async function cargarProfesores() {
-  const contenedor = document.getElementById("lista-profesores");
-  if (!contenedor) return;
+// 3. HORARIOS
+function renderizarHorarios(horarios) {
+  const cuerpoTabla = document.getElementById('cuerpo-horarios');
+  if (!cuerpoTabla) return;
+  cuerpoTabla.innerHTML = '';
 
-  try {
-    const profesores = await sheetFetch("Profesores");
-    if (profesores.length === 0) {
-      contenedor.innerHTML = "<p style='color:#a1a9b8;'>Sin datos en la pestaña Profesores</p>";
-      return;
-    }
-
-    contenedor.innerHTML = profesores.map(p => {
-      const nombre = getVal(p, "nombre") || Object.values(p)[0] || "Profesor";
-      const rol = getVal(p, "rol") || getVal(p, "especialidad") || Object.values(p)[1] || "";
-      const desc = getVal(p, "descripcion") || getVal(p, "desc") || Object.values(p)[2] || "";
-      const img = getVal(p, "imagen") || getVal(p, "foto") || "profesor1.jpg";
-
-      return `
-        <div class="card-profesor">
-          <img src="${img}" alt="${nombre}">
-          <div class="card-profesor-info">
-            <span class="card-profesor-role">${rol}</span>
-            <h3 class="card-profesor-nombre">${nombre}</h3>
-            <p class="card-profesor-desc">${desc}</p>
-          </div>
-        </div>
-      `;
-    }).join("");
-  } catch (err) {
-    console.error(err);
-    contenedor.innerHTML = `<p style='color:#ea2b2b;'>Error leyendo Profesores. Revisa el acceso del Sheet.</p>`;
-  }
+  horarios.forEach(h => {
+    const fila = document.createElement('tr');
+    fila.innerHTML = `
+      <td><strong>${h.hora || h.Hora || ''}</strong></td>
+      <td>${h.lunes || h.Lunes || '-'}</td>
+      <td>${h.martes || h.Martes || '-'}</td>
+      <td>${h.miercoles || h.Miercoles || '-'}</td>
+      <td>${h.jueves || h.Jueves || '-'}</td>
+      <td>${h.viernes || h.Viernes || '-'}</td>
+      <td>${h.sabado || h.Sabado || '-'}</td>
+      <td>${h.domingo || h.Domingo || '-'}</td>
+    `;
+    cuerpoTabla.appendChild(fila);
+  });
 }
-
-// Carga Planes
-async function cargarPlanes() {
-  const contenedor = document.getElementById("lista-planes");
-  if (!contenedor) return;
-
-  try {
-    let planes = [];
-    try {
-      planes = await sheetFetch("Planes");
-    } catch(e) {
-      planes = await sheetFetch("Planes "); // Intento de respaldo con espacio
-    }
-
-    if (planes.length === 0) {
-      contenedor.innerHTML = "<p style='color:#a1a9b8;'>Sin datos en la pestaña Planes</p>";
-      return;
-    }
-
-    contenedor.innerHTML = planes.map(plan => {
-      const nombre = getVal(plan, "nombre") || Object.values(plan)[0] || "";
-      const precio = getVal(plan, "precio") || Object.values(plan)[1] || "";
-      const periodo = getVal(plan, "periodo") || Object.values(plan)[2] || "";
-      const badge = getVal(plan, "badge") || "MÁS RECOMENDADO";
-      const dest = getVal(plan, "destacado");
-      const esDestacado = dest === true || dest.toString().toLowerCase() === "true" || nombre.toUpperCase() === "SEMESTRAL";
-
-      const rawBen = getVal(plan, "beneficios") || Object.values(plan)[5] || "";
-      const listaBeneficios = Array.isArray(rawBen) 
-        ? rawBen 
-        : rawBen.split(/,|\n/).map(b => b.trim()).filter(b => b !== "");
-
-      return `
-        <div class="tarjeta-plan ${esDestacado ? 'destacado' : ''}">
-          ${esDestacado ? `<div class="badge-pop">${badge}</div>` : ''}
-          <div>
-            <h3 class="nombre-plan">${nombre}</h3>
-            <div class="precio-plan">${precio} <span>${periodo}</span></div>
-            <ul class="lista-beneficios">
-              ${listaBeneficios.map(b => `
-                <li class="${b.includes('★') \vert{}\vert{} b.toLowerCase().includes('incluye') ? 'destacado-texto' : ''}">${b}</li>
-              `).join('')}
-            </ul>
-          </div>
-          <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20el%20plan%20${encodeURIComponent(nombre)}" 
-             target="_blank" 
-             class="btn-plan">
-             QUIERO ESTE PLAN
-          </a>
-        </div>
-      `;
-    }).join('');
-  } catch (err) {
-    console.error(err);
-    contenedor.innerHTML = `<p style='color:#ea2b2b;'>Error leyendo Planes. Revisa el acceso del Sheet.</p>`;
-  }
-}
-
-// Carga Horarios
-async function cargarHorarios() {
-  const cuerpo = document.getElementById("cuerpo-horarios");
-  if (!cuerpo) return;
-
-  try {
-    const horarios = await sheetFetch("Horarios");
-    if (horarios.length === 0) {
-      cuerpo.innerHTML = "<tr><td colspan='8'>Sin horarios registrados en la hoja.</td></tr>";
-      return;
-    }
-
-    cuerpo.innerHTML = horarios.map(h => `
-      <tr>
-        <td><strong>${getVal(h, 'hora') || Object.values(h)[0] || ''}</strong></td>
-        <td>${getVal(h, 'lunes') || Object.values(h)[1] || ''}</td>
-        <td>${getVal(h, 'martes') || Object.values(h)[2] || ''}</td>
-        <td>${getVal(h, 'miercoles') || getVal(h, 'miércoles') || Object.values(h)[3] || ''}</td>
-        <td>${getVal(h, 'jueves') || Object.values(h)[4] || ''}</td>
-        <td>${getVal(h, 'viernes') || Object.values(h)[5] || ''}</td>
-        <td>${getVal(h, 'sabado') || getVal(h, 'sábado') || Object.values(h)[6] || ''}</td>
-        <td>${getVal(h, 'domingo') || Object.values(h)[7] || ''}</td>
-      </tr>
-    `).join("");
-  } catch (err) {
-    console.error(err);
-    cuerpo.innerHTML = "<tr><td colspan='8' style='color:#ea2b2b;'>Error cargando Horarios.</td></tr>";
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  cargarGeneral();
-  cargarProfesores();
-  cargarPlanes();
-  cargarHorarios();
-});
