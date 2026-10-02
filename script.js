@@ -1,16 +1,14 @@
-// ==========================================
-// CONFIGURACIÓN DE GOOGLE SHEETS
-// ==========================================
 const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
 
-// Lector inteligente de CSV desde Google Sheets
 async function sheetFetch(nombrePestana) {
   const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(nombrePestana)}`;
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Error leyendo pestaña "${nombrePestana}": ${res.status}`);
+  
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: No se pudo acceder a la pestaña ${nombrePestana}`);
+  }
 
-  const buffer = await res.arrayBuffer();
-  const textoCSV = new TextDecoder("utf-8").decode(buffer);
+  const textoCSV = await res.text();
   return parsearCSV(textoCSV);
 }
 
@@ -31,7 +29,6 @@ function parsearCSV(csv) {
   });
 }
 
-// Busca cualquier propiedad sin importar si está en mayúsculas o minúsculas
 function getVal(obj, keyName) {
   if (!obj) return "";
   const keys = Object.keys(obj);
@@ -39,10 +36,7 @@ function getVal(obj, keyName) {
   return matchedKey ? obj[matchedKey] : "";
 }
 
-// ==========================================
-// RENDERIZADO DESDE GOOGLE SHEETS
-// ==========================================
-
+// Carga General
 async function cargarGeneral() {
   try {
     const filas = await sheetFetch("General");
@@ -58,122 +52,133 @@ async function cargarGeneral() {
 
     const elemDir = document.getElementById("footer-direccion");
     if (elemDir && general.direccion) elemDir.textContent = general.direccion;
-
-    const redes = document.getElementById("footer-redes");
-    if (redes) {
-      redes.innerHTML = "";
-      if (general.instagram) redes.innerHTML += `<a href="${general.instagram}" target="_blank" style="margin-right:15px; color:#ea2b2b;">Instagram</a>`;
-      if (general.whatsapp) redes.innerHTML += `<a href="${general.whatsapp}" target="_blank" style="color:#ea2b2b;">WhatsApp</a>`;
-    }
   } catch (err) {
-    console.warn("Sección General no disponible:", err);
+    console.warn("General:", err);
   }
 }
 
+// Carga Profesores
 async function cargarProfesores() {
   const contenedor = document.getElementById("lista-profesores");
   if (!contenedor) return;
 
   try {
     const profesores = await sheetFetch("Profesores");
-    if (profesores && profesores.length > 0) {
-      contenedor.innerHTML = profesores.map(p => {
-        const nombre = getVal(p, "nombre") || "Profesor";
-        const rol = getVal(p, "rol") || getVal(p, "especialidad") || "";
-        const desc = getVal(p, "descripcion") || getVal(p, "desc") || "";
-        const img = getVal(p, "imagen") || getVal(p, "foto") || "profesor1.jpg";
-
-        return `
-          <div class="card-profesor">
-            <img src="${img}" alt="${nombre}">
-            <div class="card-profesor-info">
-              <span class="card-profesor-role">${rol}</span>
-              <h3 class="card-profesor-nombre">${nombre}</h3>
-              <p class="card-profesor-desc">${desc}</p>
-            </div>
-          </div>
-        `;
-      }).join("");
+    if (profesores.length === 0) {
+      contenedor.innerHTML = "<p style='color:#a1a9b8;'>Sin datos en la pestaña Profesores</p>";
+      return;
     }
+
+    contenedor.innerHTML = profesores.map(p => {
+      const nombre = getVal(p, "nombre") || Object.values(p)[0] || "Profesor";
+      const rol = getVal(p, "rol") || getVal(p, "especialidad") || Object.values(p)[1] || "";
+      const desc = getVal(p, "descripcion") || getVal(p, "desc") || Object.values(p)[2] || "";
+      const img = getVal(p, "imagen") || getVal(p, "foto") || "profesor1.jpg";
+
+      return `
+        <div class="card-profesor">
+          <img src="${img}" alt="${nombre}">
+          <div class="card-profesor-info">
+            <span class="card-profesor-role">${rol}</span>
+            <h3 class="card-profesor-nombre">${nombre}</h3>
+            <p class="card-profesor-desc">${desc}</p>
+          </div>
+        </div>
+      `;
+    }).join("");
   } catch (err) {
-    console.error("Error cargando Profesores:", err);
+    console.error(err);
+    contenedor.innerHTML = `<p style='color:#ea2b2b;'>Error leyendo Profesores. Revisa el acceso del Sheet.</p>`;
   }
 }
 
+// Carga Planes
 async function cargarPlanes() {
   const contenedor = document.getElementById("lista-planes");
   if (!contenedor) return;
 
   try {
-    const planes = await sheetFetch("Planes");
-    if (planes && planes.length > 0) {
-      contenedor.innerHTML = planes.map(plan => {
-        const nombre = getVal(plan, "nombre");
-        const precio = getVal(plan, "precio");
-        const periodo = getVal(plan, "periodo");
-        const badge = getVal(plan, "badge") || "MÁS RECOMENDADO";
-        const dest = getVal(plan, "destacado");
-        const esDestacado = dest === true || dest.toString().toLowerCase() === "true" || nombre.toUpperCase() === "SEMESTRAL";
-
-        const rawBen = getVal(plan, "beneficios");
-        const listaBeneficios = Array.isArray(rawBen) 
-          ? rawBen 
-          : rawBen.split(/,|\n/).map(b => b.trim()).filter(b => b !== "");
-
-        return `
-          <div class="tarjeta-plan ${esDestacado ? 'destacado' : ''}">
-            ${esDestacado ? `<div class="badge-pop">${badge}</div>` : ''}
-            <div>
-              <h3 class="nombre-plan">${nombre}</h3>
-              <div class="precio-plan">${precio} <span>${periodo}</span></div>
-              <ul class="lista-beneficios">
-                ${listaBeneficios.map(b => `
-                  <li class="${b.includes('★') \vert{}\vert{} b.toLowerCase().includes('incluye') ? 'destacado-texto' : ''}">${b}</li>
-                `).join('')}
-              </ul>
-            </div>
-            <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20el%20plan%20${encodeURIComponent(nombre)}" 
-               target="_blank" 
-               class="btn-plan">
-               QUIERO ESTE PLAN
-            </a>
-          </div>
-        `;
-      }).join('');
+    let planes = [];
+    try {
+      planes = await sheetFetch("Planes");
+    } catch(e) {
+      planes = await sheetFetch("Planes "); // Intento de respaldo con espacio
     }
+
+    if (planes.length === 0) {
+      contenedor.innerHTML = "<p style='color:#a1a9b8;'>Sin datos en la pestaña Planes</p>";
+      return;
+    }
+
+    contenedor.innerHTML = planes.map(plan => {
+      const nombre = getVal(plan, "nombre") || Object.values(plan)[0] || "";
+      const precio = getVal(plan, "precio") || Object.values(plan)[1] || "";
+      const periodo = getVal(plan, "periodo") || Object.values(plan)[2] || "";
+      const badge = getVal(plan, "badge") || "MÁS RECOMENDADO";
+      const dest = getVal(plan, "destacado");
+      const esDestacado = dest === true || dest.toString().toLowerCase() === "true" || nombre.toUpperCase() === "SEMESTRAL";
+
+      const rawBen = getVal(plan, "beneficios") || Object.values(plan)[5] || "";
+      const listaBeneficios = Array.isArray(rawBen) 
+        ? rawBen 
+        : rawBen.split(/,|\n/).map(b => b.trim()).filter(b => b !== "");
+
+      return `
+        <div class="tarjeta-plan ${esDestacado ? 'destacado' : ''}">
+          ${esDestacado ? `<div class="badge-pop">${badge}</div>` : ''}
+          <div>
+            <h3 class="nombre-plan">${nombre}</h3>
+            <div class="precio-plan">${precio} <span>${periodo}</span></div>
+            <ul class="lista-beneficios">
+              ${listaBeneficios.map(b => `
+                <li class="${b.includes('★') \vert{}\vert{} b.toLowerCase().includes('incluye') ? 'destacado-texto' : ''}">${b}</li>
+              `).join('')}
+            </ul>
+          </div>
+          <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20el%20plan%20${encodeURIComponent(nombre)}" 
+             target="_blank" 
+             class="btn-plan">
+             QUIERO ESTE PLAN
+          </a>
+        </div>
+      `;
+    }).join('');
   } catch (err) {
-    console.error("Error cargando Planes:", err);
+    console.error(err);
+    contenedor.innerHTML = `<p style='color:#ea2b2b;'>Error leyendo Planes. Revisa el acceso del Sheet.</p>`;
   }
 }
 
+// Carga Horarios
 async function cargarHorarios() {
   const cuerpo = document.getElementById("cuerpo-horarios");
   if (!cuerpo) return;
 
   try {
     const horarios = await sheetFetch("Horarios");
-    if (horarios && horarios.length > 0) {
-      cuerpo.innerHTML = horarios.map(h => `
-        <tr>
-          <td><strong>${getVal(h, 'hora')}</strong></td>
-          <td>${getVal(h, 'lunes')}</td>
-          <td>${getVal(h, 'martes')}</td>
-          <td>${getVal(h, 'miercoles') || getVal(h, 'miércoles')}</td>
-          <td>${getVal(h, 'jueves')}</td>
-          <td>${getVal(h, 'viernes')}</td>
-          <td>${getVal(h, 'sabado') || getVal(h, 'sábado')}</td>
-          <td>${getVal(h, 'domingo')}</td>
-        </tr>
-      `).join("");
+    if (horarios.length === 0) {
+      cuerpo.innerHTML = "<tr><td colspan='8'>Sin horarios registrados en la hoja.</td></tr>";
+      return;
     }
+
+    cuerpo.innerHTML = horarios.map(h => `
+      <tr>
+        <td><strong>${getVal(h, 'hora') || Object.values(h)[0] || ''}</strong></td>
+        <td>${getVal(h, 'lunes') || Object.values(h)[1] || ''}</td>
+        <td>${getVal(h, 'martes') || Object.values(h)[2] || ''}</td>
+        <td>${getVal(h, 'miercoles') || getVal(h, 'miércoles') || Object.values(h)[3] || ''}</td>
+        <td>${getVal(h, 'jueves') || Object.values(h)[4] || ''}</td>
+        <td>${getVal(h, 'viernes') || Object.values(h)[5] || ''}</td>
+        <td>${getVal(h, 'sabado') || getVal(h, 'sábado') || Object.values(h)[6] || ''}</td>
+        <td>${getVal(h, 'domingo') || Object.values(h)[7] || ''}</td>
+      </tr>
+    `).join("");
   } catch (err) {
-    console.error("Error cargando Horarios:", err);
+    console.error(err);
+    cuerpo.innerHTML = "<tr><td colspan='8' style='color:#ea2b2b;'>Error cargando Horarios.</td></tr>";
   }
 }
 
-// ==========================================
-// EJECUCIÓN
-// ==========================================
 document.addEventListener("DOMContentLoaded", () => {
   cargarGeneral();
   cargarProfesores();
