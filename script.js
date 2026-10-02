@@ -41,11 +41,22 @@ async function cargarProfesores() {
     }
 
     cont.innerHTML = profesores.map(p => {
-      const nombre = p.nombre || Object.values(p)[0] || 'Profesor';
-      const rol = p.rol || p.especialidad || Object.values(p)[1] || '';
-      const desc = p.descripcion || p.desc || Object.values(p)[2] || '';
+      const valores = Object.values(p);
+
+      const nombre = p.nombre || valores[0] || 'Profesor';
+      const rol = p.rol || p.especialidad || valores[1] || '';
+
+      // Filtramos para encontrar cuál campo contiene una extensión de imagen o link
+      let rawImg = p.imagen || p.foto || valores.find(v => typeof v === 'string' && (v.includes('.') || v.includes('http'))) || 'profesor1.jpg';
       
-      let imgUrl = p.imagen || p.foto || 'profesor1.jpg';
+      // La descripción será el texto que NO sea ni nombre, ni rol, ni link de imagen
+      let desc = p.descripcion || p.desc || '';
+      if (!desc) {
+        const posibleDesc = valores.find(v => v !== nombre && v !== rol && v !== rawImg);
+        desc = posibleDesc || '';
+      }
+
+      let imgUrl = rawImg.trim();
 
       // Conversión automática de enlaces de Google Drive
       if (imgUrl.includes('drive.google.com')) {
@@ -57,7 +68,7 @@ async function cargarProfesores() {
 
       return `
         <div class="card-profesor" style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; margin-bottom: 10px;">
-          <img src="${imgUrl}" alt="${nombre}" style="width:100%; max-height:250px; object-fit:cover;">
+          <img src="${imgUrl}" alt="${nombre}" style="width:100%; max-height:250px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/300x250?text=Sin+Imagen'">
           <div class="card-profesor-info">
             <span class="card-profesor-role" style="color:#ea2b2b;">${rol}</span>
             <h3 class="card-profesor-nombre">${nombre}</h3>
