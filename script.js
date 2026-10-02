@@ -1,8 +1,5 @@
 // ==========================================
 // CONFIGURACIÓN DE GOOGLE SHEETS (vía endpoint gviz/tq de Google)
-// No requiere API key. Funciona con la hoja compartida como
-// "Cualquiera con el enlace puede ver" (no hace falta "Publicar en la web").
-// A diferencia de /pub, este endpoint SÍ respeta el nombre de la pestaña.
 // ==========================================
 const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
 
@@ -12,9 +9,6 @@ async function sheetFetch(nombrePestana) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Error leyendo pestaña "${nombrePestana}": ${res.status}`);
 
-  // Forzamos la decodificación como UTF-8 explícitamente. Si usáramos
-  // res.text() directo, el navegador a veces adivina mal la codificación
-  // y las tildes (é, á, í, ó, ú, ñ) salen corruptas (ej: "Ã©" en vez de "é").
   const buffer = await res.arrayBuffer();
   const textoCSV = new TextDecoder("utf-8").decode(buffer);
   return parsearCSV(textoCSV);
@@ -50,15 +44,11 @@ async function cargarGeneral() {
       if (clave) general[clave.trim()] = valor;
     });
 
-    // Solo actualiza el título si en Google Sheets viene definido y es distinto a "MILAS Gym"
-    if (general.tituloPrincipal && general.tituloPrincipal !== "MILAS Box") {
-      document.getElementById("hero-titulo").textContent = general.tituloPrincipal;
-    } else if (!general.tituloPrincipal) {
-      document.getElementById("hero-titulo").textContent = "MILAS Box";
-    }
+    const elemSub = document.getElementById("hero-subtitulo");
+    if (elemSub && general.subtitulo) elemSub.textContent = general.subtitulo;
 
-    document.getElementById("hero-subtitulo").textContent = general.subtitulo || "";
-    document.getElementById("footer-direccion").textContent = general.direccion || "";
+    const elemDir = document.getElementById("footer-direccion");
+    if (elemDir && general.direccion) elemDir.textContent = general.direccion;
 
     const redes = document.getElementById("footer-redes");
     if (redes) {
@@ -68,7 +58,6 @@ async function cargarGeneral() {
     }
   } catch (err) {
     console.error("Error cargando General:", err);
-    document.getElementById("hero-titulo").textContent = "MILAS Box";
   }
 }
 
@@ -81,107 +70,85 @@ async function cargarProfesores() {
     const contenedor = document.getElementById("lista-profesores");
     if (!contenedor) return;
 
-    if (profesores.length === 0) {
+    if (!profesores || profesores.length === 0) {
       contenedor.innerHTML = "<p>No hay profesores registrados.</p>";
       return;
     }
 
-    contenedor.innerHTML = profesores.map(p => `
-      <div class="card">
-        ${p.fotoURL ? `<img src="${p.fotoURL}" alt="${p.nombre || ''}">` : ''}
-        <h3>${p.nombre || 'Profesor'}</h3>
-        <p>${p.especialidad || ''}</p>
-      </div>
-    `).join("");
+    contenedor.innerHTML = profesores.map(p => {
+      const nombre = p.nombre || p.Nombre || 'Profesor';
+      const rol = p.rol || p.Rol || p.especialidad || p.Especialidad || '';
+      const descripcion = p.descripcion || p.Descripcion || '';
+      const imagen = p.imagen || p.Imagen || p.fotoURL || p.Foto || '';
+
+      return `
+        <div class="card-profesor">
+          ${imagen ? `<img src="${imagen}" alt="${nombre}">` : ''}
+          <div class="card-profesor-info">
+            <span class="card-profesor-role">${rol}</span>
+            <h3 class="card-profesor-nombre">${nombre}</h3>
+            <p class="card-profesor-desc">${descripcion}</p>
+          </div>
+        </div>
+      `;
+    }).join("");
   } catch (err) {
     console.error("Error cargando Profesores:", err);
   }
 }
 
 // ==========================================
-// 3. PLANES
+// 3. PLANES (Leyendo dinámicamente desde la hoja "Planes")
 // ==========================================
-// Arreglo con los planes obtenidos de tu planilla
-const planes = [
-  {
-    nombre: "MENSUAL",
-    precio: "$39.990",
-    destacado: false,
-    beneficios: [
-      "🥊 Clases de Boxeo incluidas",
-      "🏋️ Accesso a Sala de Musculación",
-      "🔥 Modalidad Full Acceso"
-    ]
-  },
-  {
-    nombre: "TRIMESTRAL",
-    precio: "$84.990",
-    destacado: false,
-    beneficios: [
-      "🥊 Clases de Boxeo incluidas",
-      "🏋️ Accesso a Sala de Musculación",
-      "🔥 Modalidad Full Acceso"
-    ]
-  },
-  {
-    nombre: "SEMESTRAL",
-    precio: "$139.990",
-    destacado: true, // Resalta la tarjeta visualmente
-    badge: "MÁS RECOMENDADO",
-    beneficios: [
-      "🥊 Clases de Boxeo incluidas",
-      "🏋️ Accesso a Sala de Musculación",
-      "🔥 Modalidad Full Acceso",
-      "⭐ Incluye Evaluación Kinésica O Rutina de Entrenamiento"
-    ]
-  }
-];
-
-// Función para renderizar los planes en la landing
-function cargarPlanes() {
+async function cargarPlanes() {
   const contenedor = document.getElementById("lista-planes");
   if (!contenedor) return;
 
-  // Si tus datos dinámicos vienen de una variable global (ej: datosExcel.planes) o API:
-  // Usa esa variable en lugar de un arreglo fijo.
-  const listaPlanes = window.datosPlanes || planes; 
+  try {
+    // Intentamos leer la pestaña "Planes" desde tu Google Sheet
+    const planesSheet = await sheetFetch("Planes");
 
-  contenedor.innerHTML = listaPlanes.map(plan => {
-    const esDestacado = plan.destacado || plan.Destacado === true || plan.nombre?.toUpperCase() === "SEMESTRAL";
-    const nombre = plan.nombre || plan.Nombre;
-    const precio = plan.precio || plan.Precio;
-    const periodo = plan.periodo || plan.Periodo || "";
-    const badge = plan.badge || plan.Badge || "MÁS RECOMENDADO";
-    const beneficios = plan.beneficios || plan.Beneficios || [];
+    if (planesSheet && planesSheet.length > 0) {
+      contenedor.innerHTML = planesSheet.map(plan => {
+        const nombre = plan.nombre || plan.Nombre || "";
+        const precio = plan.precio || plan.Precio || "";
+        const periodo = plan.periodo || plan.Periodo || "";
+        const badge = plan.badge || plan.Badge || "MÁS RECOMENDADO";
+        const esDestacado = plan.destacado === "true" || plan.destacado === true || plan.Destacado === "true" || nombre.toUpperCase() === "SEMESTRAL";
+        
+        // Formatear beneficios (si vienen separados por coma o salto de línea en el Excel)
+        const beneficiosRaw = plan.beneficios || plan.Beneficios || "";
+        const listaBeneficios = Array.isArray(beneficiosRaw) 
+          ? beneficiosRaw 
+          : beneficiosRaw.split(/,|\n/).map(b => b.trim()).filter(b => b !== "");
 
-    // Convierte beneficios en lista si vienen como texto separado por comas desde el Excel
-    const listaBeneficios = Array.isArray(beneficios) 
-      ? beneficios 
-      : beneficios.split(",").map(b => b.trim());
-
-    return `
-      <div class="tarjeta-plan ${esDestacado ? 'destacado' : ''}">
-        ${esDestacado ? `<div class="badge-pop">${badge}</div>` : ''}
-        <div>
-          <h3 class="nombre-plan">${nombre}</h3>
-          <div class="precio-plan">${precio} <span>${periodo}</span></div>
-          <ul class="lista-beneficios">
-            ${listaBeneficios.map(b => `
-              <li class="${b.includes('★') \vert{}\vert{} b.includes('Incluye') ? 'destacado-texto' : ''}">${b}</li>
-            `).join('')}
-          </ul>
-        </div>
-        <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20el%20plan%20${nombre}" 
-           target="_blank" 
-           class="btn-plan">
-           QUIERO ESTE PLAN
-        </a>
-      </div>
-    `;
-  }).join('');
+        return `
+          <div class="tarjeta-plan ${esDestacado ? 'destacado' : ''}">
+            ${esDestacado ? `<div class="badge-pop">${badge}</div>` : ''}
+            <div>
+              <h3 class="nombre-plan">${nombre}</h3>
+              <div class="precio-plan">${precio} <span>${periodo}</span></div>
+              <ul class="lista-beneficios">
+                ${listaBeneficios.map(b => `
+                  <li class="${b.includes('★') \vert{}\vert{} b.includes('Incluye') ? 'destacado-texto' : ''}">${b}</li>
+                `).join('')}
+              </ul>
+            </div>
+            <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20el%20plan%20${encodeURIComponent(nombre)}" 
+               target="_blank" 
+               class="btn-plan">
+               QUIERO ESTE PLAN
+            </a>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch (err) {
+    console.error("Error cargando Planes desde Google Sheets:", err);
+  }
 }
-// Ejecutar cuando cargue el documento
-document.addEventListener("DOMContentLoaded", cargarPlanes);// ==========================================
+
+// ==========================================
 // 4. HORARIOS
 // ==========================================
 async function cargarHorarios() {
@@ -196,7 +163,6 @@ async function cargarHorarios() {
     }
 
     cuerpo.innerHTML = horarios.map(h => {
-      // Helper para buscar el valor de la columna sin importar tildes o mayúsculas
       const obtener = (nombre) => {
         const clave = Object.keys(h).find(k => k.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === nombre.toLowerCase());
         return clave ? h[clave] : '';
