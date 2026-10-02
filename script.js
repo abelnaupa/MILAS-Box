@@ -64,6 +64,9 @@ async function cargarProfesores() {
 }
 
 // 2. Cargar Planes
+// PON AQUÍ TU NÚMERO DE WHATSAPP (código de país 56 + 9 + número sin espacios)
+const NUMERO_WHATSAPP = "569XXXXXXXX"; 
+
 async function cargarPlanes() {
   const cont = document.getElementById('lista-planes');
   if (!cont) return;
@@ -76,19 +79,34 @@ async function cargarPlanes() {
     }
 
     cont.innerHTML = planes.map(p => {
+      // Leemos el nombre, precio y periodo directamente del Google Sheet
       const nombre = p.nombre || Object.values(p)[0] || 'Plan';
       const precio = p.precio || Object.values(p)[1] || '';
       const periodo = p.periodo || Object.values(p)[2] || '';
       const beneficiosRaw = p.beneficios || Object.values(p)[3] || '';
       const listaBeneficios = beneficiosRaw.split(',').map(b => b.trim()).filter(b => b);
 
+      // 1. CONSTRUCCIÓN DINÁMICA DEL MENSAJE DE WHATSAPP:
+      // Si cambias el precio o nombre en Google Sheet, el mensaje se actualiza automáticamente.
+      const mensaje = `Hola MILAS, me interesa el plan ${nombre} de ${precio} ${periodo}`.trim();
+      
+      // 2. CODIFICAMOS EL MENSAJE PARA LA URL
+      const urlWsp = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+
       return `
-        <div class="tarjeta-plan" style="border: 1px solid rgba(255,255,255,0.1); padding: 20px; margin-bottom: 10px;">
+        <div class="tarjeta-plan" style="border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; background-color: #171d29; margin-bottom: 15px;">
           <h3 class="nombre-plan">${nombre}</h3>
-          <div class="precio-plan" style="font-size:2rem; font-weight:bold;">${precio} <span style="font-size:1rem;">${periodo}</span></div>
-          <ul class="lista-beneficios" style="margin: 15px 0;">
+          <div class="precio-plan" style="font-size: 2rem; font-weight: bold; margin: 10px 0;">
+            ${precio} <span style="font-size: 1rem; font-weight: normal; color: #a1a9b8;">${periodo}</span>
+          </div>
+          <ul class="lista-beneficios" style="margin: 15px 0; padding-left: 20px; text-align: left;">
             ${listaBeneficios.map(b => `<li>✓ ${b}</li>`).join('')}
           </ul>
+
+          <!-- BOTÓN DINÁMICO DE WHATSAPP -->
+          <a href="${urlWsp}" target="_blank" class="btn-plan" style="display: block; text-align: center; background-color: #25d366; color: #ffffff; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold; margin-top: 15px;">
+            QUIERO ESTE PLAN
+          </a>
         </div>
       `;
     }).join('');
@@ -97,7 +115,6 @@ async function cargarPlanes() {
     cont.innerHTML = `<p style="color:#ea2b2b;">Error al leer la pestaña "Planes". Revisa que el Sheet sea público.</p>`;
   }
 }
-
 // 3. Cargar Horarios
 async function cargarHorarios() {
   const cuerpo = document.getElementById('cuerpo-horarios');
