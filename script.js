@@ -1,11 +1,10 @@
 // ==========================================
-// CONFIGURACIÓN DE GOOGLE SHEETS (vía endpoint gviz/tq de Google)
+// CONFIGURACIÓN DE GOOGLE SHEETS
 // ==========================================
 const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
 
 async function sheetFetch(nombrePestana) {
   const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(nombrePestana)}`;
-
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Error leyendo pestaña "${nombrePestana}": ${res.status}`);
 
@@ -31,6 +30,13 @@ function parsearCSV(csv) {
   });
 }
 
+// Helper para obtener valores sin importar mayúsculas/minúsculas en el Excel
+function getProp(obj, keyName) {
+  if (!obj) return "";
+  const foundKey = Object.keys(obj).find(k => k.trim().toLowerCase() === keyName.toLowerCase());
+  return foundKey ? obj[foundKey] : "";
+}
+
 // ==========================================
 // 1. GENERAL
 // ==========================================
@@ -39,8 +45,8 @@ async function cargarGeneral() {
     const filas = await sheetFetch("General");
     const general = {};
     filas.forEach(fila => {
-      const clave = fila.campo || fila.Campo || Object.values(fila)[0];
-      const valor = fila.valor || fila.Valor || Object.values(fila)[1];
+      const clave = getProp(fila, "campo") || Object.values(fila)[0];
+      const valor = getProp(fila, "valor") || Object.values(fila)[1];
       if (clave) general[clave.trim()] = valor;
     });
 
@@ -65,86 +71,90 @@ async function cargarGeneral() {
 // 2. PROFESORES
 // ==========================================
 async function cargarProfesores() {
+  const contenedor = document.getElementById("lista-profesores");
+  if (!contenedor) return;
+
   try {
     const profesores = await sheetFetch("Profesores");
-    const contenedor = document.getElementById("lista-profesores");
-    if (!contenedor) return;
+    if (profesores && profesores.length > 0) {
+      contenedor.innerHTML = profesores.map(p => {
+        const nombre = getProp(p, "nombre") || 'Profesor';
+        const rol = getProp(p, "rol") || getProp(p, "especialidad") || '';
+        const desc = getProp(p, "descripcion") || getProp(p, "desc") || '';
+        const img = getProp(p, "imagen") || getProp(p, "foto") || getProp(p, "fotourl") || 'profesor1.jpg';
 
-    if (!profesores || profesores.length === 0) {
-      contenedor.innerHTML = "<p>No hay profesores registrados.</p>";
-      return;
-    }
-
-    contenedor.innerHTML = profesores.map(p => {
-      const nombre = p.nombre || p.Nombre || 'Profesor';
-      const rol = p.rol || p.Rol || p.especialidad || p.Especialidad || '';
-      const descripcion = p.descripcion || p.Descripcion || '';
-      const imagen = p.imagen || p.Imagen || p.fotoURL || p.Foto || '';
-
-      return `
-        <div class="card-profesor">
-          ${imagen ? `<img src="${imagen}" alt="${nombre}">` : ''}
-          <div class="card-profesor-info">
-            <span class="card-profesor-role">${rol}</span>
-            <h3 class="card-profesor-nombre">${nombre}</h3>
-            <p class="card-profesor-desc">${descripcion}</p>
+        return `
+          <div class="card-profesor">
+            ${img ? `<img src="${img}" alt="${nombre}">` : ''}
+            <div class="card-profesor-info">
+              <span class="card-profesor-role">${rol}</span>
+              <h3 class="card-profesor-nombre">${nombre}</h3>
+              <p class="card-profesor-desc">${desc}</p>
+            </div>
           </div>
-        </div>
-      `;
-    }).join("");
+        `;
+      }).join("");
+    }
   } catch (err) {
     console.error("Error cargando Profesores:", err);
   }
 }
 
 // ==========================================
-// 3. PLANES (Leyendo dinámicamente desde la hoja "Planes")
+// 3. PLANES (Lectura directa de Google Sheets)
 // ==========================================
 async function cargarPlanes() {
   const contenedor = document.getElementById("lista-planes");
   if (!contenedor) return;
 
+  let planesSheet = [];
+  
   try {
-    // Intentamos leer la pestaña "Planes" desde tu Google Sheet
-    const planesSheet = await sheetFetch("Planes");
-
-    if (planesSheet && planesSheet.length > 0) {
-      contenedor.innerHTML = planesSheet.map(plan => {
-        const nombre = plan.nombre || plan.Nombre || "";
-        const precio = plan.precio || plan.Precio || "";
-        const periodo = plan.periodo || plan.Periodo || "";
-        const badge = plan.badge || plan.Badge || "MÁS RECOMENDADO";
-        const esDestacado = plan.destacado === "true" || plan.destacado === true || plan.Destacado === "true" || nombre.toUpperCase() === "SEMESTRAL";
-        
-        // Formatear beneficios (si vienen separados por coma o salto de línea en el Excel)
-        const beneficiosRaw = plan.beneficios || plan.Beneficios || "";
-        const listaBeneficios = Array.isArray(beneficiosRaw) 
-          ? beneficiosRaw 
-          : beneficiosRaw.split(/,|\n/).map(b => b.trim()).filter(b => b !== "");
-
-        return `
-          <div class="tarjeta-plan ${esDestacado ? 'destacado' : ''}">
-            ${esDestacado ? `<div class="badge-pop">${badge}</div>` : ''}
-            <div>
-              <h3 class="nombre-plan">${nombre}</h3>
-              <div class="precio-plan">${precio} <span>${periodo}</span></div>
-              <ul class="lista-beneficios">
-                ${listaBeneficios.map(b => `
-                  <li class="${b.includes('★') \vert{}\vert{} b.includes('Incluye') ? 'destacado-texto' : ''}">${b}</li>
-                `).join('')}
-              </ul>
-            </div>
-            <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20el%20plan%20${encodeURIComponent(nombre)}" 
-               target="_blank" 
-               class="btn-plan">
-               QUIERO ESTE PLAN
-            </a>
-          </div>
-        `;
-      }).join('');
+    // Intenta leer la pestaña "Planes"
+    planesSheet = await sheetFetch("Planes");
+  } catch (e) {
+    try {
+      // Intenta por si tiene un espacio al final
+      planesSheet = await sheetFetch("Planes ");
+    } catch (err) {
+      console.error("No se pudo obtener la pestaña Planes:", err);
     }
-  } catch (err) {
-    console.error("Error cargando Planes desde Google Sheets:", err);
+  }
+
+  if (planesSheet && planesSheet.length > 0) {
+    contenedor.innerHTML = planesSheet.map(plan => {
+      const nombre = getProp(plan, "nombre");
+      const precio = getProp(plan, "precio");
+      const periodo = getProp(plan, "periodo");
+      const badge = getProp(plan, "badge") || "MÁS RECOMENDADO";
+      const destVal = getProp(plan, "destacado");
+      const esDestacado = destVal === true || destVal.toString().toLowerCase() === "true" || nombre.toUpperCase() === "SEMESTRAL";
+
+      const rawBen = getProp(plan, "beneficios");
+      const listaBeneficios = Array.isArray(rawBen) 
+        ? rawBen 
+        : rawBen.split(/,|\n/).map(b => b.trim()).filter(b => b !== "");
+
+      return `
+        <div class="tarjeta-plan ${esDestacado ? 'destacado' : ''}">
+          ${esDestacado ? `<div class="badge-pop">${badge}</div>` : ''}
+          <div>
+            <h3 class="nombre-plan">${nombre}</h3>
+            <div class="precio-plan">${precio} <span>${periodo}</span></div>
+            <ul class="lista-beneficios">
+              ${listaBeneficios.map(b => `
+                <li class="${b.includes('★') \vert{}\vert{} b.includes('Incluye') ? 'destacado-texto' : ''}">${b}</li>
+              `).join('')}
+            </ul>
+          </div>
+          <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20el%20plan%20${encodeURIComponent(nombre)}" 
+             target="_blank" 
+             class="btn-plan">
+             QUIERO ESTE PLAN
+          </a>
+        </div>
+      `;
+    }).join('');
   }
 }
 
@@ -163,21 +173,16 @@ async function cargarHorarios() {
     }
 
     cuerpo.innerHTML = horarios.map(h => {
-      const obtener = (nombre) => {
-        const clave = Object.keys(h).find(k => k.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === nombre.toLowerCase());
-        return clave ? h[clave] : '';
-      };
-
       return `
         <tr>
-          <td><strong>${obtener('hora')}</strong></td>
-          <td>${obtener('lunes')}</td>
-          <td>${obtener('martes')}</td>
-          <td>${obtener('miercoles')}</td>
-          <td>${obtener('jueves')}</td>
-          <td>${obtener('viernes')}</td>
-          <td>${obtener('sabado')}</td>
-          <td>${obtener('domingo')}</td>
+          <td><strong>${getProp(h, 'hora')}</strong></td>
+          <td>${getProp(h, 'lunes')}</td>
+          <td>${getProp(h, 'martes')}</td>
+          <td>${getProp(h, 'miercoles')}</td>
+          <td>${getProp(h, 'jueves')}</td>
+          <td>${getProp(h, 'viernes')}</td>
+          <td>${getProp(h, 'sabado')}</td>
+          <td>${getProp(h, 'domingo')}</td>
         </tr>
       `;
     }).join("");
