@@ -3,69 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MILAS Box</title>
-  <link rel="stylesheet" href="style.css">
+  <title>MILAS Boxing & Movement</title>
+  <link rel="stylesheet" href="style.css?v=4.0">
 </head>
 <body>
 
-  <!-- HERO: se llena con el documento "general" -->
-<header class="hero">
-  <div class="hero-contenedor">
-    <img src="logomilas.png" alt="MILAS Boxing and Movement" class="hero-logo">
-    <p id="hero-subtitulo" class="hero-subtitulo"></p>
-  </div>
-</header>
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-content">
+      <img src="logomilas.png" alt="MILAS Boxing & Movement" class="hero-logo">
+      <h1 class="hero-title">BOXING <span class="highlight">&</span> MOVEMENT</h1>
+      <p id="hero-subtitulo" class="hero-subtitle">Entrenamiento de Boxeo y Movimiento con Supervisión Profesional</p>
+      
+      <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20reservar%20mi%20clase%20de%20prueba" target="_blank" class="btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        RESERVA TU CLASE DE PRUEBA
+      </a>
+      
+      <p class="hero-location">STRIP VIVO · HUALPÉN</p>
+    </div>
+  </header>
 
   <!-- PROFESORES -->
   <section class="seccion">
-    <h2>Nuestros Profesores</h2>
-    <div id="lista-profesores" class="grid"></div>
+    <div class="header-seccion">
+      <span class="tag-seccion">EQUIPO</span>
+      <h2>PROFESORES</h2>
+    </div>
+    <div id="lista-profesores" class="grid-profesores"></div>
   </section>
 
   <!-- PLANES -->
   <section class="seccion">
-    <div class="contenedor-seccion">
-      <h2 class="titulo-seccion">Planes Full Acceso</h2>
-      <p class="subtitulo-seccion">Incluyen clases de boxeo + uso libre de la sala de musculación</p>
-      
-      <!-- Aquí se inyectan las tarjetas desde JS -->
-      <div id="lista-planes" class="grid-planes"></div>
+    <div class="header-seccion">
+      <span class="tag-seccion">MEMBRESÍAS</span>
+      <h2>PLANES</h2>
+    </div>
+    
+    <div id="lista-planes" class="grid-planes"></div>
 
-      <!-- Condiciones y notas al pie -->
-      <div class="notas-planes">
-        <p>* Evaluaciones kinésicas (40 min) y rutinas personalizadas se agendan en horario a convenir.</p>
-        <p class="destacado-oferta">* Ofertas válidas hasta el 30 de septiembre.</p>
-      </div>
+    <div class="notas-planes">
+      <p>* Oferta válida hasta el 30 de septiembre</p>
     </div>
   </section>
+
   <!-- HORARIOS -->
-<section class="seccion">
-  <h2>Horario de Clases</h2>
-  <p class="indicador-scroll">👈 Desliza hacia los lados para ver toda la semana 👉</p>
-  <div class="tabla-contenedor">
-    <table id="tabla-horarios">
-      <thead>
-        <tr>
-          <th>Hora</th>
-          <th>Lunes</th>
-          <th>Martes</th>
-          <th>Miércoles</th>
-          <th>Jueves</th>
-          <th>Viernes</th>
-          <th>Sábado</th>
-          <th>Domingo</th>
-        </tr>
-      </thead>
-      <tbody id="cuerpo-horarios"></tbody>
-    </table>
-  </div>
-</section>
-<!-- FOOTER: direccion y redes, desde "general" -->
-  <footer>
-    <p id="footer-direccion"></p>
-    <div id="footer-redes"></div>
+  <section class="seccion">
+    <div class="header-seccion">
+      <span class="tag-seccion">SEMANA</span>
+      <h2>HORARIOS</h2>
+    </div>
+    <p class="indicador-scroll">👈 Desliza para ver la semana 👉</p>
+    <div class="tabla-contenedor">
+      <table id="tabla-horarios">
+        <thead>
+          <tr>
+            <th>HORA</th>
+            <th>LUN</th>
+            <th>MAR</th>
+            <th>MIÉ</th>
+            <th>JUE</th>
+            <th>VIE</th>
+            <th>SÁB</th>
+            <th>DOM</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-horarios"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-brand">
+      <img src="logomilas.png" alt="MILAS" class="footer-logo">
+      <p id="footer-direccion">Strip Vivo, Hualpén · Chile</p>
+    </div>
+    <div id="footer-redes" class="footer-socials"></div>
   </footer>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=4.0"></script>
 </body>
 </html>
