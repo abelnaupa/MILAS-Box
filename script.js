@@ -30,7 +30,7 @@ function parsearCSV(csv) {
   });
 }
 
-// Helper para obtener valores sin importar mayúsculas/minúsculas en el Excel
+// Helper seguro para buscar claves sin importar mayúsculas
 function getProp(obj, keyName) {
   if (!obj) return "";
   const foundKey = Object.keys(obj).find(k => k.trim().toLowerCase() === keyName.toLowerCase());
@@ -38,7 +38,7 @@ function getProp(obj, keyName) {
 }
 
 // ==========================================
-// 1. GENERAL
+// 1. GENERAL (Protegido contra elementos nulos)
 // ==========================================
 async function cargarGeneral() {
   try {
@@ -101,20 +101,17 @@ async function cargarProfesores() {
 }
 
 // ==========================================
-// 3. PLANES (Lectura directa de Google Sheets)
+// 3. PLANES
 // ==========================================
 async function cargarPlanes() {
   const contenedor = document.getElementById("lista-planes");
   if (!contenedor) return;
 
   let planesSheet = [];
-  
   try {
-    // Intenta leer la pestaña "Planes"
     planesSheet = await sheetFetch("Planes");
   } catch (e) {
     try {
-      // Intenta por si tiene un espacio al final
       planesSheet = await sheetFetch("Planes ");
     } catch (err) {
       console.error("No se pudo obtener la pestaña Planes:", err);
