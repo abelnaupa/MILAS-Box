@@ -142,27 +142,44 @@ function cargarPlanes() {
   const contenedor = document.getElementById("lista-planes");
   if (!contenedor) return;
 
-  contenedor.innerHTML = planes.map(plan => `
-    <div class="tarjeta-plan ${plan.destacado ? 'destacado' : ''}">
-      ${plan.destacado ? `<div class="badge-pop">${plan.badge}</div>` : ''}
-      <div>
-        <h3 class="nombre-plan">${plan.nombre}</h3>
-        <div class="precio-plan">${plan.precio}</div>
-        <ul class="lista-beneficios">
-          ${plan.beneficios.map(b => `
-            <li class="${b.includes('⭐') ? 'beneficio-extra' : ''}">${b}</li>
-          `).join('')}
-        </ul>
-      </div>
-      <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20más%20información%20del%20Plan%20${plan.nombre}" 
-         target="_blank" 
-         class="btn-plan">
-         Elegir Plan ${plan.nombre}
-      </a>
-    </div>
-  `).join('');
-}
+  // Si tus datos dinámicos vienen de una variable global (ej: datosExcel.planes) o API:
+  // Usa esa variable en lugar de un arreglo fijo.
+  const listaPlanes = window.datosPlanes || planes; 
 
+  contenedor.innerHTML = listaPlanes.map(plan => {
+    const esDestacado = plan.destacado || plan.Destacado === true || plan.nombre?.toUpperCase() === "SEMESTRAL";
+    const nombre = plan.nombre || plan.Nombre;
+    const precio = plan.precio || plan.Precio;
+    const periodo = plan.periodo || plan.Periodo || "";
+    const badge = plan.badge || plan.Badge || "MÁS RECOMENDADO";
+    const beneficios = plan.beneficios || plan.Beneficios || [];
+
+    // Convierte beneficios en lista si vienen como texto separado por comas desde el Excel
+    const listaBeneficios = Array.isArray(beneficios) 
+      ? beneficios 
+      : beneficios.split(",").map(b => b.trim());
+
+    return `
+      <div class="tarjeta-plan ${esDestacado ? 'destacado' : ''}">
+        ${esDestacado ? `<div class="badge-pop">${badge}</div>` : ''}
+        <div>
+          <h3 class="nombre-plan">${nombre}</h3>
+          <div class="precio-plan">${precio} <span>${periodo}</span></div>
+          <ul class="lista-beneficios">
+            ${listaBeneficios.map(b => `
+              <li class="${b.includes('★') \vert{}\vert{} b.includes('Incluye') ? 'destacado-texto' : ''}">${b}</li>
+            `).join('')}
+          </ul>
+        </div>
+        <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20el%20plan%20${nombre}" 
+           target="_blank" 
+           class="btn-plan">
+           QUIERO ESTE PLAN
+        </a>
+      </div>
+    `;
+  }).join('');
+}
 // Ejecutar cuando cargue el documento
 document.addEventListener("DOMContentLoaded", cargarPlanes);// ==========================================
 // 4. HORARIOS
