@@ -4,7 +4,7 @@ body { font-family: system-ui, sans-serif; margin: 0; color: #1a1a1a; }
 /* HERO CON LOGO (Fondo negro para acoplar la imagen) */
 .hero {
   background-color: #000000;
-  padding: 40px 20px;
+  padding: 20px 15px; /* Reducimos el relleno vertical */
   text-align: center;
   display: flex;
   justify-content: center;
@@ -12,28 +12,39 @@ body { font-family: system-ui, sans-serif; margin: 0; color: #1a1a1a; }
 }
 
 .hero-contenedor {
-  max-width: 500px;
+  max-width: 400px;
   width: 100%;
 }
 
 .hero-logo {
-  max-width: 320px;
-  width: 85%;
+  max-width: 220px; /* Ancho máximo controlado */
+  max-height: 120px; /* Altura máxima para que no ocupe media pantalla */
+  width: auto;
   height: auto;
   display: block;
-  margin: 0 auto 15px auto;
+  margin: 0 auto 10px auto;
+  object-fit: contain;
 }
 
 .hero-subtitulo {
   color: #94a3b8;
-  font-size: 16px;
+  font-size: 14px;
   margin: 0;
   font-weight: 500;
 }
 
 @media (max-width: 480px) {
+  .hero {
+    padding: 15px 10px;
+  }
+  
   .hero-logo {
-    max-width: 240px;
+    max-width: 160px; /* Aún más compacto en teléfonos */
+    max-height: 90px;
+  }
+  
+  .hero-subtitulo {
+    font-size: 13px;
   }
 }
 
