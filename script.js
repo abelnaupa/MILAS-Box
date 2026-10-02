@@ -30,7 +30,6 @@ function parsearCSV(csv) {
   });
 }
 
-// Helper seguro para buscar claves sin importar mayúsculas
 function getProp(obj, keyName) {
   if (!obj) return "";
   const foundKey = Object.keys(obj).find(k => k.trim().toLowerCase() === keyName.toLowerCase());
@@ -38,162 +37,130 @@ function getProp(obj, keyName) {
 }
 
 // ==========================================
-// 1. GENERAL (Protegido contra elementos nulos)
+// DATOS POR DEFECTO (GARANTIZAN QUE SE VEA SIEMPRE)
 // ==========================================
-async function cargarGeneral() {
-  try {
-    const filas = await sheetFetch("General");
-    const general = {};
-    filas.forEach(fila => {
-      const clave = getProp(fila, "campo") || Object.values(fila)[0];
-      const valor = getProp(fila, "valor") || Object.values(fila)[1];
-      if (clave) general[clave.trim()] = valor;
-    });
-
-    const elemSub = document.getElementById("hero-subtitulo");
-    if (elemSub && general.subtitulo) elemSub.textContent = general.subtitulo;
-
-    const elemDir = document.getElementById("footer-direccion");
-    if (elemDir && general.direccion) elemDir.textContent = general.direccion;
-
-    const redes = document.getElementById("footer-redes");
-    if (redes) {
-      redes.innerHTML = "";
-      if (general.instagram) redes.innerHTML += `<a href="${general.instagram}" target="_blank">Instagram</a> `;
-      if (general.whatsapp) redes.innerHTML += `<a href="${general.whatsapp}" target="_blank">WhatsApp</a>`;
-    }
-  } catch (err) {
-    console.error("Error cargando General:", err);
-  }
-}
+const DATOS_DEFECTO = {
+  profesores: [
+    { nombre: "MATÍAS LAGOS", rol: "HEAD COACH · BOXEO", desc: "Técnica, guardia y trabajo de saco con enfoque en rendimiento deportivo.", img: "profesor1.jpg" },
+    { nombre: "CAMILA SOTO", rol: "KINESIÓLOGA · MOVIMIENTO", desc: "Evaluación kinésica, movilidad articular y prevención de lesiones.", img: "profesor2.jpg" },
+    { nombre: "DIEGO FUENTES", rol: "PREPARADOR FÍSICO · FUERZA", desc: "Fuerza funcional y acondicionamiento de alta intensidad.", img: "profesor3.jpg" }
+  ],
+  planes: [
+    { nombre: "MENSUAL", precio: "$39.990", periodo: "/mes", destacado: false, beneficios: "Clases de Boxeo incluidas, Acceso a Sala de Musculación, Modalidad Full Acceso" },
+    { nombre: "TRIMESTRAL", precio: "$84.990", periodo: "/3 meses", destacado: false, beneficios: "Clases de Boxeo incluidas, Acceso a Sala de Musculación, Modalidad Full Acceso" },
+    { nombre: "SEMESTRAL", precio: "$139.990", periodo: "/6 meses", destacado: true, badge: "MÁS RECOMENDADO", beneficios: "Clases de Boxeo incluidas, Acceso a Sala de Musculación, Modalidad Full Acceso, ★ Incluye Evaluación Kinésica" }
+  ],
+  horarios: [
+    { hora: "08:00 - 09:30", lunes: "Boxeo", martes: "Movimiento", miercoles: "Boxeo", jueves: "Movimiento", viernes: "Boxeo", sabado: "-", domingo: "-" },
+    { hora: "18:00 - 19:30", lunes: "Boxeo", martes: "Fuerza", miercoles: "Boxeo", jueves: "Fuerza", viernes: "Boxeo", sabado: "Open Gym", domingo: "-" }
+  ]
+};
 
 // ==========================================
-// 2. PROFESORES
+// RENDERIZADO
 // ==========================================
-async function cargarProfesores() {
+function renderProfesores(lista) {
   const contenedor = document.getElementById("lista-profesores");
   if (!contenedor) return;
 
-  try {
-    const profesores = await sheetFetch("Profesores");
-    if (profesores && profesores.length > 0) {
-      contenedor.innerHTML = profesores.map(p => {
-        const nombre = getProp(p, "nombre") || 'Profesor';
-        const rol = getProp(p, "rol") || getProp(p, "especialidad") || '';
-        const desc = getProp(p, "descripcion") || getProp(p, "desc") || '';
-        const img = getProp(p, "imagen") || getProp(p, "foto") || getProp(p, "fotourl") || 'profesor1.jpg';
+  contenedor.innerHTML = lista.map(p => {
+    const nombre = getProp(p, "nombre") || p.nombre || 'Profesor';
+    const rol = getProp(p, "rol") || getProp(p, "especialidad") || p.rol || '';
+    const desc = getProp(p, "descripcion") || getProp(p, "desc") || p.desc || '';
+    const img = getProp(p, "imagen") || getProp(p, "foto") || p.img || 'profesor1.jpg';
 
-        return `
-          <div class="card-profesor">
-            ${img ? `<img src="${img}" alt="${nombre}">` : ''}
-            <div class="card-profesor-info">
-              <span class="card-profesor-role">${rol}</span>
-              <h3 class="card-profesor-nombre">${nombre}</h3>
-              <p class="card-profesor-desc">${desc}</p>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-  } catch (err) {
-    console.error("Error cargando Profesores:", err);
-  }
+    return `
+      <div class="card-profesor">
+        ${img ? `<img src="${img}" alt="${nombre}">` : ''}
+        <div class="card-profesor-info">
+          <span class="card-profesor-role">${rol}</span>
+          <h3 class="card-profesor-nombre">${nombre}</h3>
+          <p class="card-profesor-desc">${desc}</p>
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
-// ==========================================
-// 3. PLANES
-// ==========================================
-async function cargarPlanes() {
+function renderPlanes(lista) {
   const contenedor = document.getElementById("lista-planes");
   if (!contenedor) return;
 
-  let planesSheet = [];
-  try {
-    planesSheet = await sheetFetch("Planes");
-  } catch (e) {
-    try {
-      planesSheet = await sheetFetch("Planes ");
-    } catch (err) {
-      console.error("No se pudo obtener la pestaña Planes:", err);
-    }
-  }
+  contenedor.innerHTML = lista.map(plan => {
+    const nombre = getProp(plan, "nombre") || plan.nombre || "";
+    const precio = getProp(plan, "precio") || plan.precio || "";
+    const periodo = getProp(plan, "periodo") || plan.periodo || "";
+    const badge = getProp(plan, "badge") || plan.badge || "MÁS RECOMENDADO";
+    const destVal = getProp(plan, "destacado") ?? plan.destacado;
+    const esDestacado = destVal === true || destVal.toString().toLowerCase() === "true" || nombre.toUpperCase() === "SEMESTRAL";
 
-  if (planesSheet && planesSheet.length > 0) {
-    contenedor.innerHTML = planesSheet.map(plan => {
-      const nombre = getProp(plan, "nombre");
-      const precio = getProp(plan, "precio");
-      const periodo = getProp(plan, "periodo");
-      const badge = getProp(plan, "badge") || "MÁS RECOMENDADO";
-      const destVal = getProp(plan, "destacado");
-      const esDestacado = destVal === true || destVal.toString().toLowerCase() === "true" || nombre.toUpperCase() === "SEMESTRAL";
+    const rawBen = getProp(plan, "beneficios") || plan.beneficios || "";
+    const listaBeneficios = Array.isArray(rawBen) 
+      ? rawBen 
+      : rawBen.split(/,|\n/).map(b => b.trim()).filter(b => b !== "");
 
-      const rawBen = getProp(plan, "beneficios");
-      const listaBeneficios = Array.isArray(rawBen) 
-        ? rawBen 
-        : rawBen.split(/,|\n/).map(b => b.trim()).filter(b => b !== "");
-
-      return `
-        <div class="tarjeta-plan ${esDestacado ? 'destacado' : ''}">
-          ${esDestacado ? `<div class="badge-pop">${badge}</div>` : ''}
-          <div>
-            <h3 class="nombre-plan">${nombre}</h3>
-            <div class="precio-plan">${precio} <span>${periodo}</span></div>
-            <ul class="lista-beneficios">
-              ${listaBeneficios.map(b => `
-                <li class="${b.includes('★') \vert{}\vert{} b.includes('Incluye') ? 'destacado-texto' : ''}">${b}</li>
-              `).join('')}
-            </ul>
-          </div>
-          <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20el%20plan%20${encodeURIComponent(nombre)}" 
-             target="_blank" 
-             class="btn-plan">
-             QUIERO ESTE PLAN
-          </a>
+    return `
+      <div class="tarjeta-plan ${esDestacado ? 'destacado' : ''}">
+        ${esDestacado ? `<div class="badge-pop">${badge}</div>` : ''}
+        <div>
+          <h3 class="nombre-plan">${nombre}</h3>
+          <div class="precio-plan">${precio} <span>${periodo}</span></div>
+          <ul class="lista-beneficios">
+            ${listaBeneficios.map(b => `
+              <li class="${b.includes('★') \vert{}\vert{} b.includes('Incluye') ? 'destacado-texto' : ''}">${b}</li>
+            `).join('')}
+          </ul>
         </div>
-      `;
-    }).join('');
-  }
+        <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20el%20plan%20${encodeURIComponent(nombre)}" 
+           target="_blank" 
+           class="btn-plan">
+           QUIERO ESTE PLAN
+        </a>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderHorarios(lista) {
+  const cuerpo = document.getElementById("cuerpo-horarios");
+  if (!cuerpo) return;
+
+  cuerpo.innerHTML = lista.map(h => `
+    <tr>
+      <td><strong>${getProp(h, 'hora') || h.hora || ''}</strong></td>
+      <td>${getProp(h, 'lunes') || h.lunes || ''}</td>
+      <td>${getProp(h, 'martes') || h.martes || ''}</td>
+      <td>${getProp(h, 'miercoles') || h.miercoles || ''}</td>
+      <td>${getProp(h, 'jueves') || h.jueves || ''}</td>
+      <td>${getProp(h, 'viernes') || h.viernes || ''}</td>
+      <td>${getProp(h, 'sabado') || h.sabado || ''}</td>
+      <td>${getProp(h, 'domingo') || h.domingo || ''}</td>
+    </tr>
+  `).join("");
 }
 
 // ==========================================
-// 4. HORARIOS
+// INICIALIZACIÓN Y LECTURA
 // ==========================================
-async function cargarHorarios() {
+document.addEventListener("DOMContentLoaded", async () => {
+  // 1. Mostrar todo de inmediato con datos base
+  renderProfesores(DATOS_DEFECTO.profesores);
+  renderPlanes(DATOS_DEFECTO.planes);
+  renderHorarios(DATOS_DEFECTO.horarios);
+
+  // 2. Intentar actualizar en segundo plano con Google Sheets
+  try {
+    const profs = await sheetFetch("Profesores");
+    if (profs && profs.length > 0) renderProfesores(profs);
+  } catch (e) { console.log("Profesores usando datos locales"); }
+
+  try {
+    const planes = await sheetFetch("Planes");
+    if (planes && planes.length > 0) renderPlanes(planes);
+  } catch (e) { console.log("Planes usando datos locales"); }
+
   try {
     const horarios = await sheetFetch("Horarios");
-    const cuerpo = document.getElementById("cuerpo-horarios");
-    if (!cuerpo) return;
-
-    if (!horarios || horarios.length === 0) {
-      cuerpo.innerHTML = "<tr><td colspan='8'>No hay horarios registrados.</td></tr>";
-      return;
-    }
-
-    cuerpo.innerHTML = horarios.map(h => {
-      return `
-        <tr>
-          <td><strong>${getProp(h, 'hora')}</strong></td>
-          <td>${getProp(h, 'lunes')}</td>
-          <td>${getProp(h, 'martes')}</td>
-          <td>${getProp(h, 'miercoles')}</td>
-          <td>${getProp(h, 'jueves')}</td>
-          <td>${getProp(h, 'viernes')}</td>
-          <td>${getProp(h, 'sabado')}</td>
-          <td>${getProp(h, 'domingo')}</td>
-        </tr>
-      `;
-    }).join("");
-  } catch (err) {
-    console.error("Error cargando Horarios:", err);
-  }
-}
-
-// ==========================================
-// INICIALIZACIÓN
-// ==========================================
-document.addEventListener("DOMContentLoaded", () => {
-  cargarGeneral();
-  cargarProfesores();
-  cargarPlanes();
-  cargarHorarios();
+    if (horarios && horarios.length > 0) renderHorarios(horarios);
+  } catch (e) { console.log("Horarios usando datos locales"); }
 });
