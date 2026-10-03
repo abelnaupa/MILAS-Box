@@ -368,28 +368,26 @@ body {
     display: block;
   }
 }
-/* Botón Flotante de WhatsApp */
+/* BOTÓN FLOTANTE WHATSAPP */
 .wsp-flotante {
   position: fixed;
+  bottom: 90px; /* Sube la posición del botón */
+  right: 25px;  /* Distancia desde la derecha */
   width: 60px;
   height: 60px;
-  bottom: 25px;
-  right: 25px;
   background-color: #25d366;
-  color: #fff;
-  border-radius: 50px;
-  text-align: center;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
-  z-index: 999;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
 .wsp-flotante:hover {
   transform: scale(1.1);
-  box-shadow: 0px 6px 15px rgba(37, 211, 102, 0.5);
+  background-color: #20ba5a;
 }
 
 .wsp-icono {
