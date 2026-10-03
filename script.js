@@ -1,6 +1,6 @@
 // ID de tu Google Sheet
 const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
-const NUMERO_WHATSAPP = "569XXXXXXXX"; 
+const NUMERO_WHATSAPP = "56991526567"; 
 
 // Función para descargar la pestaña en formato CSV
 async function leerHoja(nombrePestana) {
