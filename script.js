@@ -1,23 +1,7 @@
 // ID de tu Google Sheet
 const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
+const NUMERO_WHATSAPP = "569XXXXXXXX"; 
 
-// Rastreo de conversiones en Google Analytics y Meta Pixel
-document.addEventListener('click', function(e) {
-  const btnWsp = e.target.closest('a[href*="wa.me"]');
-  if (btnWsp) {
-    // Evento para Google Analytics
-    if (typeof gtag === 'function') {
-      gtag('event', 'conversion', {
-        'event_category': 'Contact',
-        'event_label': 'Click WhatsApp'
-      });
-    }
-    // Evento para Meta Pixel
-    if (typeof fbq === 'function') {
-      fbq('track', 'Lead');
-    }
-  }
-});
 // Función para descargar la pestaña en formato CSV
 async function leerHoja(nombrePestana) {
   const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(nombrePestana)}`;
@@ -63,10 +47,8 @@ async function cargarProfesores() {
       const nombre = p.nombre || valores[0] || 'Profesor';
       const rol = p.rol || p.especialidad || valores[1] || '';
 
-      // Filtramos para encontrar cuál campo contiene una extensión de imagen o link
       let rawImg = p.imagen || p.foto || valores.find(v => typeof v === 'string' && (v.includes('.') || v.includes('http'))) || 'profesor1.jpg';
       
-      // La descripción será el texto que NO sea ni nombre, ni rol, ni link de imagen
       let desc = p.descripcion || p.desc || '';
       if (!desc) {
         const posibleDesc = valores.find(v => v !== nombre && v !== rol && v !== rawImg);
@@ -75,7 +57,6 @@ async function cargarProfesores() {
 
       let imgUrl = rawImg.trim();
 
-      // Conversión automática de enlaces de Google Drive
       if (imgUrl.includes('drive.google.com')) {
         const match = imgUrl.match(/\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/);
         if (match && match[1]) {
@@ -99,10 +80,8 @@ async function cargarProfesores() {
     cont.innerHTML = `<p style="color:#ea2b2b;">Error al leer la pestaña "Profesores". Revisa que el Sheet sea público.</p>`;
   }
 }
-// 2. Cargar Planes
-// PON AQUÍ TU NÚMERO DE WHATSAPP (código de país 56 + 9 + número sin espacios)
-const NUMERO_WHATSAPP = "569XXXXXXXX"; 
 
+// 2. Cargar Planes
 async function cargarPlanes() {
   const cont = document.getElementById('lista-planes');
   if (!cont) return;
@@ -115,18 +94,13 @@ async function cargarPlanes() {
     }
 
     cont.innerHTML = planes.map(p => {
-      // Leemos el nombre, precio y periodo directamente del Google Sheet
       const nombre = p.nombre || Object.values(p)[0] || 'Plan';
       const precio = p.precio || Object.values(p)[1] || '';
       const periodo = p.periodo || Object.values(p)[2] || '';
       const beneficiosRaw = p.beneficios || Object.values(p)[3] || '';
       const listaBeneficios = beneficiosRaw.split(',').map(b => b.trim()).filter(b => b);
 
-      // 1. CONSTRUCCIÓN DINÁMICA DEL MENSAJE DE WHATSAPP:
-      // Si cambias el precio o nombre en Google Sheet, el mensaje se actualiza automáticamente.
       const mensaje = `Hola MILAS, me interesa el plan ${nombre} de ${precio} ${periodo}`.trim();
-      
-      // 2. CODIFICAMOS EL MENSAJE PARA LA URL
       const urlWsp = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
 
       return `
@@ -139,7 +113,6 @@ async function cargarPlanes() {
             ${listaBeneficios.map(b => `<li>✓ ${b}</li>`).join('')}
           </ul>
 
-          <!-- BOTÓN DINÁMICO DE WHATSAPP -->
           <a href="${urlWsp}" target="_blank" class="btn-plan" style="display: block; text-align: center; background-color: #25d366; color: #ffffff; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold; margin-top: 15px;">
             QUIERO ESTE PLAN
           </a>
@@ -151,6 +124,7 @@ async function cargarPlanes() {
     cont.innerHTML = `<p style="color:#ea2b2b;">Error al leer la pestaña "Planes". Revisa que el Sheet sea público.</p>`;
   }
 }
+
 // 3. Cargar Horarios
 async function cargarHorarios() {
   const cuerpo = document.getElementById('cuerpo-horarios');
@@ -181,22 +155,42 @@ async function cargarHorarios() {
   }
 }
 
-// Ejecutar al cargar la página
-document.addEventListener('DOMContentLoaded', () => {
-  cargarProfesores();
-  cargarPlanes();
-  cargarHorarios();
-});
-// Control del Banner de Cookies
+// 4. Control del Banner de Cookies
 function comprobarCookies() {
-  if (!localStorage.getItem('cookiesAceptadas')) {
-    document.getElementById('banner-cookies').style.display = 'block';
+  const banner = document.getElementById('banner-cookies');
+  if (banner && !localStorage.getItem('cookiesAceptadas')) {
+    banner.style.display = 'block';
   }
 }
 
 function aceptarCookies() {
   localStorage.setItem('cookiesAceptadas', 'true');
-  document.getElementById('banner-cookies').style.display = 'none';
+  const banner = document.getElementById('banner-cookies');
+  if (banner) {
+    banner.style.display = 'none';
+  }
 }
 
-window.addEventListener('DOMContentLoaded', comprobarCookies);
+// 5. Rastreo de conversiones en Google Analytics y Meta Pixel
+document.addEventListener('click', function(e) {
+  const btnWsp = e.target.closest('a[href*="wa.me"]');
+  if (btnWsp) {
+    if (typeof gtag === 'function') {
+      gtag('event', 'conversion', {
+        'event_category': 'Contact',
+        'event_label': 'Click WhatsApp'
+      });
+    }
+    if (typeof fbq === 'function') {
+      fbq('track', 'Lead');
+    }
+  }
+});
+
+// EJECUTAR TODO AL CARGAR LA PÁGINA
+document.addEventListener('DOMContentLoaded', () => {
+  cargarProfesores();
+  cargarPlanes();
+  cargarHorarios();
+  comprobarCookies();
+});
