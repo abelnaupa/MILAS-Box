@@ -1,6 +1,23 @@
 // ID de tu Google Sheet
 const SPREADSHEET_ID = "1aphxXLYW3hP1OK_H2J8EYLZQ6E8K3nZ3AL4XJ76jX4o";
 
+// Rastreo de conversiones en Google Analytics y Meta Pixel
+document.addEventListener('click', function(e) {
+  const btnWsp = e.target.closest('a[href*="wa.me"]');
+  if (btnWsp) {
+    // Evento para Google Analytics
+    if (typeof gtag === 'function') {
+      gtag('event', 'conversion', {
+        'event_category': 'Contact',
+        'event_label': 'Click WhatsApp'
+      });
+    }
+    // Evento para Meta Pixel
+    if (typeof fbq === 'function') {
+      fbq('track', 'Lead');
+    }
+  }
+});
 // Función para descargar la pestaña en formato CSV
 async function leerHoja(nombrePestana) {
   const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(nombrePestana)}`;
