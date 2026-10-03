@@ -11,7 +11,7 @@ async function leerHoja(nombrePestana) {
   return parsearCSV(texto);
 }
 
-// Convertidor de CSV a objetos JSON de JavaScript
+// Convertidor de CSV a objetos JSON
 function parsearCSV(csv) {
   const lineas = csv.split(/\r?\n/).filter(l => l.trim() !== "");
   if (lineas.length === 0) return [];
