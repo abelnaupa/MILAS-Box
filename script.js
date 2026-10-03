@@ -187,3 +187,16 @@ document.addEventListener('DOMContentLoaded', () => {
   cargarPlanes();
   cargarHorarios();
 });
+// Control del Banner de Cookies
+function comprobarCookies() {
+  if (!localStorage.getItem('cookiesAceptadas')) {
+    document.getElementById('banner-cookies').style.display = 'block';
+  }
+}
+
+function aceptarCookies() {
+  localStorage.setItem('cookiesAceptadas', 'true');
+  document.getElementById('banner-cookies').style.display = 'none';
+}
+
+window.addEventListener('DOMContentLoaded', comprobarCookies);
