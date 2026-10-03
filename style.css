@@ -391,3 +391,16 @@ body {
   object-fit: contain;
   filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.35));
 }
+/* ENLACE GOOGLE MAPS EN FOOTER */
+.link-mapa {
+  color: #a1a9b8;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.link-mapa:hover {
+  color: #ea2b2b; /* Color rojo del tema MILAS */
+  text-decoration: underline;
+}
