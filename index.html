@@ -19,8 +19,9 @@
   <meta property="og:image" content="logomilas.png">
 
   <link rel="stylesheet" href="style.css?v=7.0">
+
   <!-- Google Analytics (gtag.js) -->
-  <script async src="[https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX](https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX)"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -37,7 +38,7 @@
     n.queue=[];t=b.createElement(e);t.async=!0;
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
-    '[https://connect.facebook.net/en_US/fbevents.js](https://connect.facebook.net/en_US/fbevents.js)');
+    'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', 'NÚMERO_PIXEL_AQUÍ');
     fbq('track', 'PageView');
   </script>
@@ -59,6 +60,7 @@
       <p class="hero-location">Av. Cristóbal Colón 7948, Hualpén, Bío Bío</p>
     </div>
   </header>
+
   <!-- PROFESORES -->
   <section class="seccion">
     <div class="header-seccion">
@@ -109,45 +111,8 @@
       </table>
     </div>
   </section>
-  
-  <!-- BANNER DE COOKIES -->
-<div id="cookie-banner" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#111622; color:#fff; padding:15px; text-align:center; z-index:9999; border-top:1px solid rgba(255,255,255,0.1); font-size:0.9rem;">
-  Este sitio utiliza cookies para mejorar tu experiencia y medir visitas. 
-  <button onclick="aceptarCookies()" style="background:#ea2b2b; color:#fff; border:none; padding:8px 16px; margin-left:15px; border-radius:4px; cursor:pointer; font-weight:bold;">Aceptar</button>
-</div>
 
-<script>
-  if (!localStorage.getItem('cookies_aceptadas')) {
-    document.getElementById('cookie-banner').style.display = 'block';
-  }
-  function aceptarCookies() {
-    localStorage.setItem('cookies_aceptadas', 'true');
-    ¡Excelente lista de verificación! Vamos a implementar las mejoras técnicas directamente en tu código y dejaremos todo preparado para cuando compren el dominio definitivo.
-
-Para mantener todo ordenado y seguro, trabajaremos en tu **`index.html`**, **`style.css`** y **`script.js`**.
-
----
-
-### 1. Botón Flotante de WhatsApp + CSS
-
-Agregaremos un botón flotante de WhatsApp en la esquina inferior derecha con animación suave.
-
-#### Paso A: En tu `index.html`
-Agrega estas líneas justo antes de la etiqueta de cierre `</body>`:
-
-```html
-  <!-- BOTÓN FLOTANTE DE WHATSAPP -->
-  <a href="[https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20más%20información](https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20más%20información)" 
-     class="wsp-flotante" 
-     target="_blank" 
-     rel="noopener" 
-     aria-label="Contactar por WhatsApp">
-    <svg viewBox="0 0 32 32" class="wsp-icono">
-      <path fill="#ffffff" d="M19.11 17.205c-.372-.187-2.202-1.086-2.543-1.21-.343-.125-.592-.187-.841.187-.249.373-.966 1.21-1.184 1.459-.218.249-.436.28-.808.093-.372-.187-1.571-.579-2.993-1.847-1.106-.988-1.853-2.208-2.07-2.58-.218-.373-.023-.574.163-.76.168-.168.373-.436.559-.653.187-.218.249-.373.373-.622.124-.249.062-.467-.031-.653-.093-.187-.841-2.022-1.152-2.77-.302-.727-.611-.628-.841-.64-.218-.011-.467-.011-.715-.011-.249 0-.653.093-.996.467-.343.373-1.307 1.277-1.307 3.115 0 1.838 1.338 3.611 1.524 3.86.187.249 2.636 4.025 6.388 5.642.893.385 1.59.615 2.133.787.897.284 1.713.244 2.358.148.72-.108 2.202-.901 2.513-1.772.311-.871.311-1.618.218-1.772-.093-.155-.342-.249-.714-.436z"/>
-    </svg>
-  </a>
-  
-<!-- SECCIÓN PREGUNTAS FRECUENTES -->
+  <!-- SECCIÓN PREGUNTAS FRECUENTES -->
   <section class="seccion" id="preguntas">
     <div class="header-seccion">
       <span class="tag-seccion">DUDAS</span>
@@ -176,7 +141,24 @@ Agrega estas líneas justo antes de la etiqueta de cierre `</body>`:
       </div>
     </div>
   </section>
-  
+
+  <!-- BOTÓN FLOTANTE DE WHATSAPP -->
+  <a href="https://wa.me/569XXXXXXXX?text=Hola%20MILAS,%20quiero%20más%20información" 
+     class="wsp-flotante" 
+     target="_blank" 
+     rel="noopener" 
+     aria-label="Contactar por WhatsApp">
+    <svg viewBox="0 0 32 32" class="wsp-icono">
+      <path fill="#ffffff" d="M19.11 17.205c-.372-.187-2.202-1.086-2.543-1.21-.343-.125-.592-.187-.841.187-.249.373-.966 1.21-1.184 1.459-.218.249-.436.28-.808.093-.372-.187-1.571-.579-2.993-1.847-1.106-.988-1.853-2.208-2.07-2.58-.218-.373-.023-.574.163-.76.168-.168.373-.436.559-.653.187-.218.249-.373.373-.622.124-.249.062-.467-.031-.653-.093-.187-.841-2.022-1.152-2.77-.302-.727-.611-.628-.841-.64-.218-.011-.467-.011-.715-.011-.249 0-.653.093-.996.467-.343.373-1.307 1.277-1.307 3.115 0 1.838 1.338 3.611 1.524 3.86.187.249 2.636 4.025 6.388 5.642.893.385 1.59.615 2.133.787.897.284 1.713.244 2.358.148.72-.108 2.202-.901 2.513-1.772.311-.871.311-1.618.218-1.772-.093-.155-.342-.249-.714-.436z"/>
+    </svg>
+  </a>
+
+  <!-- BANNER DE COOKIES -->
+  <div id="banner-cookies" style="display:none; position:fixed; bottom:0; left:0; width:100%; background:#111622; color:#a1a9b8; padding:15px; text-align:center; border-top:1px solid rgba(255,255,255,0.1); z-index:1000; font-size:0.9rem;">
+    Utilizamos cookies para analizar el tráfico y mejorar tu experiencia. Al continuar navegando, aceptas su uso.
+    <button onclick="aceptarCookies()" style="background:#ea2b2b; color:#fff; border:none; padding:6px 15px; margin-left:15px; border-radius:4px; cursor:pointer; font-weight:bold;">Aceptar</button>
+  </div>
+
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-brand">
@@ -187,10 +169,5 @@ Agrega estas líneas justo antes de la etiqueta de cierre `</body>`:
   </footer>
 
   <script src="script.js?v=7.0"></script>
-  <!-- BANNER DE COOKIES -->
-  <div id="banner-cookies" style="display:none; position:fixed; bottom:0; left:0; width:100%; background:#111622; color:#a1a9b8; padding:15px; text-align:center; border-top:1px solid rgba(255,255,255,0.1); z-index:1000; font-size:0.9rem;">
-    Utilizamos cookies para analizar el tráfico y mejorar tu experiencia. Al continuar navegando, aceptas su uso.
-    <button onclick="aceptarCookies()" style="background:#ea2b2b; color:#fff; border:none; padding:6px 15px; margin-left:15px; border-radius:4px; cursor:pointer; font-weight:bold;">Aceptar</button>
-  </div>
 </body>
 </html>
