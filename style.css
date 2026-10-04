@@ -411,6 +411,24 @@ body {
   color: #ffffff!important; /* Cambia a blanco al pasar el mouse por encima */
   text-decoration: underline;
 }
+/* ENLACE INSTAGRAM FOOTER */
+.link-instagram {
+  color: #a1a9b8;
+  text-decoration: none;
+  font-size: 0.95rem;
+  display: inline-block;
+  margin-top: 12px;
+  transition: color 0.3s ease;
+}
+
+.link-instagram:hover {
+  color: #ea2b2b; /* Rojo MILAS */
+  text-decoration: underline;
+}
+
+.link-instagram strong {
+  color: #ffffff;
+}
 .link-mapa:hover {
   color: #ea2b2b; /* Color rojo del tema MILAS */
   text-decoration: underline;
