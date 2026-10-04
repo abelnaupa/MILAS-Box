@@ -408,7 +408,7 @@ body {
 }
 
 .hero-location a:hover {
-  color: #ea2b2b !important; /* Cambia a rojo al pasar el mouse por encima */
+  color: #ffffff!important; /* Cambia a blanco al pasar el mouse por encima */
   text-decoration: underline;
 }
 .link-mapa:hover {
