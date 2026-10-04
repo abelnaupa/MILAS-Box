@@ -399,7 +399,18 @@ body {
   display: inline-block;
   margin-top: 5px;
 }
+/* ESTILO PARA EL ENLACE DE DIRECCIÓN EN EL HERO */
+.hero-location a,
+.hero-location a:visited {
+  color: #a1a9b8 !important; /* Mantiene el color claro aunque ya lo hayas visitado */
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
 
+.hero-location a:hover {
+  color: #ea2b2b !important; /* Cambia a rojo al pasar el mouse por encima */
+  text-decoration: underline;
+}
 .link-mapa:hover {
   color: #ea2b2b; /* Color rojo del tema MILAS */
   text-decoration: underline;
